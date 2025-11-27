@@ -1,8 +1,10 @@
 [masters]
 172.31.13.108   # master server IP
 
-[slaves]
+[dev]
 172.31.11.171   #dev2
+
+[prod]
 172.31.11.171   #prod2
 
 [all:vars]
