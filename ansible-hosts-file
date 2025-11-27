@@ -2,10 +2,10 @@
 172.31.13.108   # master server IP
 
 [dev]
-172.31.11.171   #dev2
+172.31.10.132   # dev server IP
 
 [prod]
-172.31.11.171   #prod2
+172.31.11.171   # prod server IP
 
 [all:vars]
 ansible_user=root
