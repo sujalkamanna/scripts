@@ -1,0 +1,10 @@
+[masters]
+172.31.13.108   # master server IP
+
+[slaves]
+172.31.11.171   #dev2
+172.31.11.171   #prod2
+
+[all:vars]
+ansible_user=root
+ansible_ssh_private_key_file=/root/.ssh/id_ed25519
