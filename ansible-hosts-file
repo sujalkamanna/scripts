@@ -1,12 +1,10 @@
 [masters]
-172.31.13.108   # master server IP
-
-[dev]
-172.31.10.132   # dev server IP
+                  # master server IP
 
 [prod]
-172.31.11.171   # prod server IP
+                   # prod server IP
 
 [all:vars]
 ansible_user=root
+ansible_become=yes
 ansible_ssh_private_key_file=/root/.ssh/id_ed25519
