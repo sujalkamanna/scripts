@@ -81,6 +81,8 @@ If you have multiple slave IPs:
 ```bash
 for ip in 172.31.10.132 172.31.11.171 172.31.12.150; do
   ssh-copy-id root@$ip
+  ssh -i keyname.pem root@$ip "mkdir -p ~/.ssh && chmod 700 ~/.ssh"
+  ssh -i keyname.pem root@$ip "echo '$(cat /root/.ssh/id_ed25519.pub)' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
 done
 ```
 
