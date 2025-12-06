@@ -1,98 +1,131 @@
 ---
 
-### **Step 1: Enable root login and password authentication on the slave**
+# **Step-by-Step Ansible Setup on AWS EC2 Ubuntu**
 
-1. Edit the SSH server configuration file on the slave:
+---
 
-```bash
-sudo vi /etc/ssh/sshd_config
-```
+## **STEP 1 — Prepare MASTER (Ansible Controller)**
 
-2. Make these changes:
-
-```text
-PermitRootLogin yes
-PasswordAuthentication yes
-```
-
-3. Restart the SSH service:
+1. **Update packages**
 
 ```bash
-sudo systemctl restart ssh
-sudo sshd -t   # optional, checks syntax
+sudo apt update -y
+sudo apt upgrade -y
+```
+
+2. **Install Python3**
+
+```bash
+sudo apt install python3 -y
+```
+
+3. **Install Ansible**
+
+```bash
+sudo apt install ansible -y
+ansible --version
+```
+
+4. **Generate SSH key**
+
+```bash
+ssh-keygen -t rsa -b 4096
+# Press Enter for all prompts (no passphrase)
+```
+
+5. **Display the public key** (to copy to Slave)
+
+```bash
+cat ~/.ssh/id_rsa.pub
+```
+
+> Copy this output — will paste on the Slave in the next step.
+
+---
+
+## **STEP 2 — Prepare SLAVE (Managed Node)**
+
+1. **Update packages**
+
+```bash
+sudo apt update -y
+sudo apt upgrade -y
+```
+
+2. **Install Python3**
+
+```bash
+sudo apt install python3 -y
+```
+
+3. **Ensure SSH is enabled**
+
+```bash
+sudo systemctl enable ssh
+sudo systemctl start ssh
+```
+
+4. **Add Master’s public key for passwordless SSH**
+
+```bash
+mkdir -p /root/.ssh
+nano /root/.ssh/authorized_keys
+# Paste the master’s public key here
+chmod 700 /root/.ssh
+chmod 600 /root/.ssh/authorized_keys
+```
+
+5. **Test SSH login from Master** (on Master)
+
+```bash
+ssh root@<slave_IP>
+# Should login without password
 ```
 
 ---
 
-### **Step 2: Set the root password on the slave**
+## **STEP 3 — Configure Ansible on MASTER**
 
-1. On the slave:
+1. **Create Ansible directory and hosts file**
 
 ```bash
-sudo passwd root
+sudo mkdir -p /etc/ansible
+sudo nano /etc/ansible/hosts
 ```
 
-* Enter the new password (we used the same as the master for convenience).
+Add:
+
+```ini
+[slave_nodes]
+slave1 ansible_host=<slave_IP> ansible_user=root
+```
+
+2. **Test Ansible connectivity**
+
+```bash
+ansible all -m ping
+```
+
+Expected output:
+
+```
+slave1 | SUCCESS => { "ping": "pong" }
+```
 
 ---
 
-### **Step 3: Generate an SSH key pair on the master (if not already done)**
+# ✅ **Summary Table (Master vs Slave)**
 
-On the master:
-
-```bash
-ssh-keygen
-```
-
-* Save the key to `/root/.ssh/id_ed25519`.
-* You can leave the passphrase empty for passwordless login.
-
----
-
-### **Step 4: Copy the master’s public key to the slave**
-
-1. Use `ssh-copy-id` with the slave IP:
-
-```bash
-ssh-copy-id root@<slave-IP>
-```
-
-* Enter the root password of the slave when prompted.
-* This adds the master’s public key to `/root/.ssh/authorized_keys` on the slave.
+| Step                     | Master   | Slave                        |
+| ------------------------ | -------- | ---------------------------- |
+| Update system            | ✔        | ✔                            |
+| Install Python3          | ✔        | ✔                            |
+| Install Ansible          | ✔        | ❌                            |
+| Generate SSH key         | ✔        | ❌                            |
+| Copy Master key to Slave | ✔ (copy) | ✔ (paste in authorized_keys) |
+| Enable SSH               | ❌        | ✔                            |
+| Test passwordless SSH    | ✔        | ❌                            |
+| Create hosts file        | ✔        | ❌                            |
+| Test `ansible ping`      | ✔        | ❌                            |
 
 ---
-
-### **Step 5: Verify passwordless SSH**
-
-From the master:
-
-```bash
-ssh root@<slave-IP>
-```
-
-* You should now log in directly without being prompted for a password.
-
----
-
-### **Step 6: Optional – Copy key to multiple slaves**
-
-If you have multiple slave IPs:
-
-```bash
-for ip in 172.31.10.132 172.31.11.171 172.31.12.150; do
-  ssh-copy-id root@$ip
-  ssh -i keyname.pem root@$ip "mkdir -p ~/.ssh && chmod 700 ~/.ssh"
-  ssh -i keyname.pem root@$ip "echo '$(cat /root/.ssh/id_ed25519.pub)' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
-done
-```
-
-* This loops through all slaves and installs the master’s public key.
-
----
-
-### ✅ **What we achieved**
-
-* Root login with password enabled temporarily.
-* Root passwords synchronized with the master.
-* Master’s SSH key copied to all slaves.
-* Passwordless root SSH works from master to slave.
