@@ -90,7 +90,7 @@ ssh root@<slave_IP>
 
 ```bash
 sudo mkdir -p /etc/ansible
-sudo nano /etc/ansible/hosts
+sudo vi /etc/ansible/hosts
 ```
 
 Add:
