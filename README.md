@@ -1,6 +1,17 @@
----
+# 🛠️ scripts
 
-# scripts
+<!-- License -->
+[![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sujalkamanna/scripts/blob/main/LICENSE)
+
+<!-- Repo Info -->
+[![Repo Size](https://img.shields.io/github/repo-size/sujalkamanna/scripts?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sujalkamanna/scripts)
+
+[![Open Issues](https://img.shields.io/github/issues/sujalkamanna/scripts?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sujalkamanna/scripts/issues)
+
+[![Last Commit](https://img.shields.io/github/last-commit/sujalkamanna/scripts?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sujalkamanna/scripts/commits/main)
+
+
+
 
 ## Description
 
@@ -34,7 +45,7 @@
 * **Automation:** Setup and configure Ansible, Kubernetes, Docker, Jenkins, Tomcat, and SonarQube automatically.
 * **CI/CD Integration:** Jenkins pipeline to build and deploy Java applications.
 * **Infrastructure as Code:** Terraform scripts and guides to automate cloud and local infrastructure setup.
-* **Containerization:** Docker installation scripts and usage documentation for container-based workflows.
+* **Containerization:** Docker installation scripts and usage documentation for container‑based workflows.
 * **Cluster Management:** Kubernetes setup scripts for master and worker nodes on Ubuntu.
 
 ---
@@ -50,10 +61,9 @@
 ### Example Usage
 
 1. **Setup Ansible Master Node**
-
 ```bash
 bash ansible_master_script.sh
-```
+````
 
 2. **Configure Ansible Slave Nodes**
 
@@ -94,14 +104,37 @@ bash tomcat.sh
 
 ---
 
-## Contributing
+## License
 
-Contributions are welcome! Please open issues or pull requests for improvements, bug fixes, or new automation scripts.
+This repository and its original content (scripts, documentation, and configuration files) are licensed under the **MIT License**.
+
+* Full text of the license: [https://github.com/sujalkamanna/scripts/blob/main/LICENSE](https://github.com/sujalkamanna/scripts/blob/main/LICENSE)
+* SPDX License Identifier: `MIT`
+
+You can also view the README file on GitHub here:
+📄 [https://github.com/sujalkamanna/scripts/blob/main/README.md](https://github.com/sujalkamanna/scripts/blob/main/README.md)
 
 ---
 
-## License
+## Third‑Party Licenses
 
-Specify your license here (e.g., MIT, Apache 2.0).
+This project references several external open‑source tools and installation guides. These references are *not owned* by this repository; their source code and documentation are licensed and maintained by their respective communities.
 
+See the full list of third‑party components and their open‑source licenses here:
+📄 [https://github.com/sujalkamanna/scripts/blob/main/third_party_licenses.md](https://github.com/sujalkamanna/scripts/blob/main/third_party_licenses.md)
+
+Also see the `NOTICE` file for legal attributions and acknowledgements for third‑party open‑source tools.
+
+---
+
+## Contributing
+
+Contributions are welcome! Please open issues or pull requests for improvements, bug fixes, or new automation scripts. By contributing, you agree that your contributions will be licensed under the same MIT terms.
+
+---
+
+## Notes
+
+* The **LICENSE**, **NOTICE**, and **third_party_licenses.md** files help document open‑source compliance and clarify both your license and the licenses of external software referenced.
+* Please review and comply with the licenses of third‑party tools you install or integrate.
 ---
