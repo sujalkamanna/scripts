@@ -37,7 +37,28 @@
 | `sonarqube.sh`             | Script to install and configure SonarQube.                                               |
 | `terraform.md`             | Guide for installing Terraform and AWS CLI for infrastructure automation.                |
 | `tomcat.sh`                | Script to install and configure Tomcat 11.                                               |
+---
 
+```text
+📦 scripts
+ ┣ 📜 ansible_configuration.md
+ ┣ 📜 ansible_master_script.sh
+ ┣ 📜 ansible_slave_scripts.sh
+ ┣ 📜 docker.md
+ ┣ 📜 docker.sh
+ ┣ 📜 jenkins.sh
+ ┣ 📂 jenkins_pipeline
+ ┣ 📜 k8-common-script
+ ┣ 📜 k8-master-script
+ ┣ 📜 k8-README.md
+ ┣ 📜 k8-slave-script
+ ┣ 📜 LICENSE
+ ┣ 📜 README.md
+ ┣ 📜 sonarqube.sh
+ ┣ 📜 terraform.md
+ ┣ 📜 third_party_licenses.md
+ ┗ 📜 tomcat.sh
+```
 ---
 
 ## Features
