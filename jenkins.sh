@@ -1,15 +1,16 @@
 #!/bin/bash
 
-#==========================================================
-# STEP-1: Installing Git and Maven   (yum install git maven -y)
-#==========================================================
-echo "🔧 Installing Git and Maven..."
-sudo apt update -y
-sudo apt install -y git maven
+set -e
 
 #==========================================================
-# STEP-2: Jenkins Repository Setup (jenkins.io repo)
-# (wget -O /etc/yum.repos.d/jenkins.repo ... rpm --import ...)
+# STEP-1: Install Git and Maven
+#==========================================================
+echo "🔧 Installing Git and Maven..."
+sudo apt update
+sudo apt install -y git maven curl
+
+#==========================================================
+# STEP-2: Add Jenkins Repository
 #==========================================================
 echo "📦 Adding Jenkins repository..."
 
@@ -22,33 +23,30 @@ echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
 
 #==========================================================
 # STEP-3: Install Java 21 and Jenkins
-# (yum install java-21-amazon-corretto && yum install jenkins -y)
 #==========================================================
-echo "☕ Installing Java 21 + Jenkins..."
+echo "☕ Installing Java 21 and Jenkins..."
 
-sudo apt update -y
-sudo apt install -y fontconfig openjdk-21-jdk
-sudo apt install -y jenkins
-
-# Optional: Increase tmp size for large builds
-# sudo mount -o remount,size=2G /tmp
+sudo apt update
+sudo apt install -y fontconfig openjdk-21-jdk jenkins
 
 #==========================================================
-# STEP-4: Start and check Jenkins status
-# (systemctl start jenkins.service / systemctl status jenkins.service)
+# STEP-4: Start Jenkins
 #==========================================================
-echo "🚀 Starting Jenkins service..."
+echo "🚀 Starting Jenkins..."
 sudo systemctl start jenkins
-sudo systemctl status jenkins --no-pager
-
-#==========================================================
-# STEP-5: Auto-Start Jenkins
-# (chkconfig jenkins on → systemctl enable jenkins)
-#==========================================================
-echo "🔒 Enabling Jenkins auto-start at boot..."
 sudo systemctl enable jenkins
 
-echo "✅ Jenkins installation completed successfully!"
-echo "➡ URL:  http://<your-server-ip>:8080"
+#==========================================================
+# STEP-5: Firewall (optional but recommended)
+#==========================================================
+sudo ufw allow 8080 || true
+
+#==========================================================
+# STEP-6: Jenkins Status & Password
+#==========================================================
+echo "✅ Jenkins is running:"
+sudo systemctl is-active jenkins
+
+echo "➡ URL: http://<your-server-ip>:8080"
 echo "🔑 Initial admin password:"
 sudo cat /var/lib/jenkins/secrets/initialAdminPassword
