@@ -1,10 +1,10 @@
 #!/bin/bash
 set -e
 
-# Update OS
+# Update system
 sudo apt update -y && sudo apt upgrade -y
 
-# Install essential tools
+# Install required tools
 sudo apt install -y curl ca-certificates gnupg lsb-release
 
 # Install Docker (latest stable)
@@ -25,9 +25,9 @@ echo "$(cat kubectl.sha256) kubectl" | sha256sum --check
 sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 rm kubectl kubectl.sha256
 
-# Verify installations
+# Display versions
 docker --version
 minikube version
 kubectl version --client
 
-echo "Setup complete. Run: newgrp docker && minikube start --driver=docker"
+echo "Installation complete. Run: newgrp docker && minikube start --driver=docker"
