@@ -19,24 +19,36 @@
 
 ---
 
+Here is the **updated Repository Structure section** with the **new files added**, keeping everything else unchanged and concise.
+
+---
+
 ## Repository Structure
 
-| File / Folder              | Description                                                                              |
-| -------------------------- | ---------------------------------------------------------------------------------------- |
-| `ansible_master_script.sh` | Script to set up the Ansible master node with instructions.                              |
-| `ansible_slave_scripts.sh` | Scripts to configure Ansible slave nodes for automation tasks.                           |
-| `ansible_configuration.md` | Documentation for configuring Ansible hosts and environment.                             |
-| `docker.md`                | Documentation on Docker installation and usage.                                          |
-| `docker.sh`                | Script for installing and managing Docker with improved comments and usage instructions. |
-| `jenkins.sh`               | Script for installing and configuring Jenkins.                                           |
-| `jenkins_pipeline/`        | Contains a Jenkins pipeline for building and deploying Java projects.                    |
-| `k8-README.md`             | Guide for setting up a Kubernetes cluster on Ubuntu 24.04.                               |
-| `k8-common-script`         | Common scripts used across Kubernetes master and slave nodes.                            |
-| `k8-master-script`         | Script for configuring Kubernetes master node.                                           |
-| `k8-slave-script`          | Script for configuring Kubernetes worker nodes.                                          |
-| `sonarqube.sh`             | Script to install and configure SonarQube.                                               |
-| `terraform.md`             | Guide for installing Terraform and AWS CLI for infrastructure automation.                |
-| `tomcat.sh`                | Script to install and configure Tomcat 11.                                               |
+| File / Folder              | Description                                                  |
+| -------------------------- | ------------------------------------------------------------ |
+| `ansible_master_script.sh` | Script to set up the Ansible master node.                    |
+| `ansible_slave_scripts.sh` | Script to configure Ansible slave nodes.                     |
+| `ansible_configuration.md` | Documentation for configuring Ansible hosts and environment. |
+| `docker.md`                | Documentation on Docker installation and usage.              |
+| `docker.sh`                | Script for installing and managing Docker.                   |
+| `docker-compose.sh`        | Script to install and configure Docker Compose.              |
+| `docker-swarm.md`          | Documentation for setting up Docker Swarm.                   |
+| `jenkins.sh`               | Script for installing and configuring Jenkins.               |
+| `jenkins_pipeline/`        | Jenkins pipeline for building and deploying Java projects.   |
+| `k8-README.md`             | Kubernetes cluster setup guide.                              |
+| `k8-common-script`         | Common scripts for Kubernetes nodes.                         |
+| `k8-master-script`         | Script for configuring Kubernetes master node.               |
+| `k8-slave-script`          | Script for configuring Kubernetes worker nodes.              |
+| `minikube.sh`              | Script to install and configure Minikube.                    |
+| `self-hosted.md`           | Guide for self-hosted DevOps tools and runners.              |
+| `sonarqube.sh`             | Script to install and configure SonarQube.                   |
+| `terraform.md`             | Guide for installing Terraform and AWS CLI.                  |
+| `tomcat.sh`                | Script to install and configure Tomcat 11.                   |
+| `LICENSE`                  | MIT license file.                                            |
+| `README.md`                | Main project documentation.                                  |
+| `third_party_licenses.md`  | Third-party license acknowledgements.                        |
+
 ---
 
 ```text
@@ -44,6 +56,8 @@
  ┣ 📜 ansible_configuration.md
  ┣ 📜 ansible_master_script.sh
  ┣ 📜 ansible_slave_scripts.sh
+ ┣ 📜 docker-compose.sh
+ ┣ 📜 docker-swarm.md
  ┣ 📜 docker.md
  ┣ 📜 docker.sh
  ┣ 📜 jenkins.sh
@@ -52,13 +66,16 @@
  ┣ 📜 k8-master-script
  ┣ 📜 k8-README.md
  ┣ 📜 k8-slave-script
- ┣ 📜 LICENSE
- ┣ 📜 README.md
+ ┣ 📜 minikube.sh
+ ┣ 📜 self-hosted.md
  ┣ 📜 sonarqube.sh
  ┣ 📜 terraform.md
- ┣ 📜 third_party_licenses.md
- ┗ 📜 tomcat.sh
+ ┣ 📜 tomcat.sh
+ ┣ 📜 LICENSE
+ ┣ 📜 README.md
+ ┗ 📜 third_party_licenses.md
 ```
+
 ---
 
 ## Features
