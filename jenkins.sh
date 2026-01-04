@@ -3,50 +3,85 @@
 set -e
 
 #==========================================================
-# STEP-1: Install Git and Maven
+# Jenkins Installation Script (Ubuntu / Debian)
+# Installs: Git, Maven, Java 21, Jenkins
 #==========================================================
-echo "🔧 Installing Git and Maven..."
-sudo apt update
-sudo apt install -y git maven curl
+
+# Variables
+JENKINS_PORT=8080
+PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 || echo localhost)
+JENKINS_URL="http://${PUBLIC_IP}:${JENKINS_PORT}"
+JAVA_VERSION="21"
 
 #==========================================================
-# STEP-2: Add Jenkins Repository
+# STEP 1: Install Git, Maven, Curl, and unzip
+#==========================================================
+echo "🔧 Installing Git, Maven, Curl, and unzip..."
+sudo apt update -y
+sudo apt install -y git maven curl unzip
+
+#==========================================================
+# STEP 2: Install Java $JAVA_VERSION
+#==========================================================
+echo "☕ Installing Java $JAVA_VERSION..."
+sudo apt update -y
+sudo apt install -y openjdk-${JAVA_VERSION}-jdk fontconfig
+
+# Verify Java installation
+echo "💻 Verifying Java installation..."
+java -version
+javac -version
+
+# Set JAVA_HOME
+JAVA_HOME_PATH=$(readlink -f /usr/bin/java | sed "s:bin/java::")
+echo "export JAVA_HOME=${JAVA_HOME_PATH}" | sudo tee /etc/profile.d/java.sh
+source /etc/profile.d/java.sh
+
+echo "✅ JAVA_HOME set to: $JAVA_HOME"
+
+#==========================================================
+# STEP 3: Add Jenkins Repository
 #==========================================================
 echo "📦 Adding Jenkins repository..."
-
-curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee \
-  /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
 
 echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
-  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
-  /etc/apt/sources.list.d/jenkins.list > /dev/null
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
 
 #==========================================================
-# STEP-3: Install Java 21 and Jenkins
+# STEP 4: Install Jenkins
 #==========================================================
-echo "☕ Installing Java 21 and Jenkins..."
-
-sudo apt update
-sudo apt install -y fontconfig openjdk-21-jdk jenkins
+echo "📥 Installing Jenkins..."
+sudo apt update -y
+sudo apt install -y jenkins
 
 #==========================================================
-# STEP-4: Start Jenkins
+# STEP 5: Start Jenkins
 #==========================================================
 echo "🚀 Starting Jenkins..."
 sudo systemctl start jenkins
 sudo systemctl enable jenkins
 
 #==========================================================
-# STEP-5: Firewall (optional but recommended)
+# STEP 6: Configure Firewall (optional)
 #==========================================================
-sudo ufw allow 8080 || true
+echo "🛡 Configuring firewall to allow port ${JENKINS_PORT}..."
+sudo ufw allow ${JENKINS_PORT} || true
 
 #==========================================================
-# STEP-6: Jenkins Status & Password
+# STEP 7: Display Jenkins Status and Initial Admin Password
 #==========================================================
-echo "✅ Jenkins is running:"
+echo "✅ Jenkins service status:"
 sudo systemctl is-active jenkins
 
-echo "➡ URL: http://<your-server-ip>:8080"
+echo "➡ Jenkins URL: ${JENKINS_URL}"
 echo "🔑 Initial admin password:"
 sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+
+#==========================================================
+# STEP 8: Optional Notes
+#==========================================================
+echo "💡 Notes:"
+echo "- Visit the URL above to unlock Jenkins and install recommended plugins."
+echo "- Git and Maven are installed for building Java projects."
+echo "- Java $JAVA_VERSION is installed and JAVA_HOME is set."
