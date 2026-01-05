@@ -1,10 +1,16 @@
 #!/bin/bash
 set -e
 
-# --- CONFIGURATION (edit as needed) ---
+### CONFIGURATION - EDIT IF NEEDED ###
 NEW_USER="minikubeuser"
 NEW_PASS="Minikube@123"
-# --------------------------------------
+#######################################
+
+# Check for root
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run this script with sudo or as root."
+  exit 1
+fi
 
 echo "### Updating system packages..."
 apt update -y && apt upgrade -y
@@ -16,14 +22,13 @@ echo "### Installing Docker (latest stable)..."
 curl -fsSL https://get.docker.com | sh
 systemctl enable --now docker
 
-echo "### Creating new non-root user: $NEW_USER"
-# Create the user and set password
-useradd -m -s /bin/bash $NEW_USER
+echo "### Creating new user: $NEW_USER"
+useradd -m -s /bin/bash "$NEW_USER" || true
 echo "$NEW_USER:$NEW_PASS" | chpasswd
 
-echo "### Adding $NEW_USER to sudoers and docker group..."
-usermod -aG sudo $NEW_USER
-usermod -aG docker $NEW_USER
+echo "### Adding $NEW_USER to sudo & docker group..."
+usermod -aG sudo "$NEW_USER"
+usermod -aG docker "$NEW_USER"
 
 echo "### Installing Minikube (latest)..."
 curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
@@ -44,12 +49,23 @@ minikube version
 kubectl version --client
 
 echo ""
-echo "### NEXT STEPS (IMPORTANT):"
-echo "1) Log in as the new user:"
-echo "     su - $NEW_USER"
-echo "2) Start Minikube as that user (not root):"
-echo "     minikube start --driver=docker"
+echo "### Starting Minikube as $NEW_USER..."
+sudo -H -u "$NEW_USER" bash << EOF
+# ensure docker group refresh
+newgrp docker << EEND
+echo "Running minikube start..."
+minikube start --driver=docker
+EEND
+EOF
+
 echo ""
-echo "User credentials:"
-echo "   Username: $NEW_USER"
-echo "   Password: $NEW_PASS"
+echo "### Setup complete!"
+echo "User:     $NEW_USER"
+echo "Password: $NEW_PASS"
+echo ""
+echo "To use kubectl, switch to the new user:"
+echo "   su - $NEW_USER"
+echo "Then try:"
+echo "   kubectl get nodes"
+echo ""
+echo "Done!"
