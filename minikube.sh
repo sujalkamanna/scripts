@@ -1,3 +1,6 @@
+# copy to download file directly
+# wget https://raw.githubusercontent.com/sujalkamanna/scripts/main/minikube.sh
+
 #!/bin/bash
 set -e
 
