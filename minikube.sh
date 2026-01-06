@@ -3,7 +3,7 @@ set -e
 
 ### CONFIGURATION - EDIT IF NEEDED ###
 NEW_USER="minikubeuser"
-NEW_PASS="Minikube@123"
+NEW_PASS="minikubeuser"
 #######################################
 
 # Check for root
@@ -13,7 +13,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 echo "### Updating system packages..."
-apt update -y && apt upgrade -y
+apt update -y
 
 echo "### Installing required tools..."
 apt install -y curl ca-certificates gnupg lsb-release sudo
