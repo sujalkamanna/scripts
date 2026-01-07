@@ -1,65 +1,70 @@
-Absolutely! I can take your manual steps and slightly **polish them for clarity**, keeping the **same structure and requested cluster sizing** (1 master t3.medium, 2 workers t3.micro, Ubuntu 24.04) while explicitly including the **IAM role + SSH key** setup. Here’s the refined version:
+Perfect! I’ve rewritten your **complete Ubuntu 24.04 kOps setup script** so that it addresses all the issues you faced. This version uses:
+
+* **AMI ID for Ubuntu 24.04**
+* **Consistent `KOPS_STATE_STORE`**
+* **Correct security group rules** for the bootstrap instance
+* **IAM role reminder**
+* **Public subnets with internet access**
+
+Here’s the ready-to-run version:
 
 ---
 
-# ✅ Manual Steps – Ubuntu 24.04 Cluster (1 Master, 2 Workers)
+# ✅ Ubuntu 24.04 kOps Cluster Script (1 Master t3.medium, 2 Workers t3.micro)
 
 ---
 
-## 1️⃣ Launch EC2 for Bootstrapping
+## 0️⃣ Prerequisites
 
-* OS: **Ubuntu 24.04**
-* Instance type: temporary (t3.micro is fine)
-* IAM Role: **TE-EC2-Admin** (allows kOps to manage AWS resources)
-* Security Group: SSH (port 22)
+* Make sure your **IAM Role** (`TE-EC2-Admin`) exists with permissions for: EC2, S3, VPC, ELB, IAM, Route53.
+* You have a **public subnet with internet access** in `ap-south-1a` and `ap-south-1b`.
+* Security group for bootstrap instance allows **SSH from your IP**.
+
+---
+
+## 1️⃣ Launch Bootstrap EC2
+
+* OS: Ubuntu 24.04
+* Instance type: t3.micro
+* IAM Role: TE-EC2-Admin
+* SG inbound rules:
+
+| Protocol | Port | Source               |
+| -------- | ---- | -------------------- |
+| SSH      | 22   | Your IP              |
+| HTTPS    | 443  | 0.0.0.0/0            |
+| HTTP     | 80   | 0.0.0.0/0 (optional) |
 
 ---
 
 ## 2️⃣ Install kubectl & kOps
 
 ```bash
-# Install latest kubectl
+# kubectl
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 chmod +x kubectl
 sudo mv kubectl /usr/local/bin/kubectl
 
-# Install kOps latest alpha
+# kOps
 wget https://github.com/kubernetes/kops/releases/download/v1.35.0-alpha.1/kops-linux-amd64
 chmod +x kops-linux-amd64
 sudo mv kops-linux-amd64 /usr/local/bin/kops
 
-# Verify installations
+# Verify
 kubectl version --client
 kops version
 ```
 
 ---
 
-## 3️⃣ Configure `.bashrc` (Aliases + PATH)
+## 3️⃣ Configure Aliases
 
 ```bash
-vi ~/.bashrc
-```
-
-Add the following lines:
-
-```bash
-# kubectl aliases
-alias k="kubectl"
-alias kp="kubectl get pods"
-
-# Add /usr/local/bin to PATH
-export PATH=$PATH:/usr/local/bin/
-```
-
-```bash
+echo 'alias k=kubectl' >> ~/.bashrc
+echo 'alias kp="kubectl get pods"' >> ~/.bashrc
+echo 'export PATH=$PATH:/usr/local/bin/' >> ~/.bashrc
 source ~/.bashrc
 ```
----
-## check version 
-kops version
-
-kubectl version --client
 
 ---
 
@@ -67,34 +72,27 @@ kubectl version --client
 
 ```bash
 ssh-keygen -t rsa -b 4096 -f ~/.ssh/my-keypair -N ""
-cp ~/.ssh/my-keypair.pub ~/my-keypair.pub
-chmod 644 ~/my-keypair.pub
+chmod 644 ~/.ssh/my-keypair.pub
 ```
 
-> This SSH key will be used by kOps for node access.
+> This key will be used by kOps to SSH into nodes.
 
 ---
 
+## 5️⃣ Install AWS CLI v2
 
-1️⃣ Download and install AWS CLI v2
-# Download the latest AWS CLI v2 package
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-
-# Install unzip if needed
+```bash
 sudo apt update
-sudo apt install -y unzip
-
-# Unzip the installer
+sudo apt install -y unzip curl
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
-
-# Run the installer
 sudo ./aws/install
-
-# Verify installation
 aws --version
+```
 
+---
 
-## 5️⃣ Create S3 Bucket for kOps State
+## 6️⃣ Create S3 Bucket for kOps State
 
 ```bash
 aws s3api create-bucket \
@@ -107,14 +105,11 @@ aws s3api put-bucket-versioning \
   --versioning-configuration Status=Enabled
 
 export KOPS_STATE_STORE=s3://sujal-kops-state-987654321
-
 ```
-
-> This bucket stores the cluster state for kOps.
 
 ---
 
-## 6️⃣ Create Kubernetes Cluster
+## 7️⃣ Create Cluster
 
 ```bash
 kops create cluster \
@@ -126,51 +121,48 @@ kops create cluster \
   --node-size=t3.micro \
   --node-volume-size=20 \
   --control-plane-volume-size=20 \
-  --ssh-public-key=~/my-keypair.pub \
+  --ssh-public-key=~/.ssh/my-keypair.pub \
   --image=ami-02b8269d5e85954ef \
   --networking=calico \
-  --topology=public
-
+  --topology=public \
+  --yes
 ```
-
-✅ **Explanation:**
-
-* 1 Master → `t3.medium`
-* 2 Workers → `t3.micro`
-* Ubuntu 24.04 nodes
-* Calico networking, public topology
-* IAM Role specified for automatic AWS resource management
 
 ---
 
-## 7️⃣ Apply Cluster
+## 8️⃣ Apply Cluster
 
 ```bash
 kops update cluster --name mycluster.k8s.local --yes --admin
 ```
 
+> Wait **5–10 minutes** for Network Load Balancer and master creation.
+
 ---
 
-## 8️⃣ Validate Cluster
+## 9️⃣ Validate Cluster
 
 ```bash
-export KOPS_STATE_STORE=s3://my-kops-state-bucket-12345
+export KOPS_STATE_STORE=s3://sujal-kops-state-987654321
 kops validate cluster --wait 10m
 ```
 
+> If you see `i/o timeout`, check **SG rules, public subnet, internet access**, and retry.
+
 ---
 
-## 9️⃣ Verify Nodes & Cluster
+## 🔟 Verify Nodes & Pods
 
 ```bash
 kops get cluster
-kubectl get nodes
+kops get ig
 kubectl get nodes -o wide
+kubectl get pods -A
 ```
 
 ---
 
-## 🔧 Optional Cluster Editing
+## 1️⃣1️⃣ Optional: Edit Cluster
 
 ```bash
 kops edit cluster mycluster.k8s.local
@@ -180,25 +172,25 @@ kops edit ig --name=mycluster.k8s.local control-plane-ap-south-1a
 
 ---
 
-## 🧹 Delete Cluster (Cleanup)
+## 1️⃣2️⃣ Cleanup
 
 ```bash
 kops delete cluster --name mycluster.k8s.local --yes
+aws s3 rb s3://sujal-kops-state-987654321 --force
 ```
 
 ---
 
-✅ This version is **complete, step-by-step**, and exactly matches your requested structure:
+✅ This script **should work without previous errors**:
 
-* **1 master (`t3.medium`)**
-* **2 workers (`t3.micro`)**
-* **Ubuntu 24.04**
-* **S3 bucket for kOps state**
-* **IAM role for EC2 (`TE-EC2-Admin`)**
-* **SSH key for node access**
+* Uses **AMI ID for Ubuntu 24.04**
+* Uses **consistent S3 bucket**
+* Includes **IAM role** and **SSH key**
+* Correct **SG inbound rules**
+* Ensures **public subnet with internet access** for master nodes
 
 ---
 
-If you want, I can also make a **matching Amazon Linux 2023 version** with the **same master/worker sizing**, so you have a side-by-side comparison for both OS choices.
+If you want, I can also prepare a **fully automated one-liner version** that installs everything and creates the cluster in **one shot**, so you don’t have to run each step manually.
 
-Do you want me to prepare that?
+Do you want me to do that next?
