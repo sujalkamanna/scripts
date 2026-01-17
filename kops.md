@@ -1,6 +1,4 @@
----
-
-# ✅ Ubuntu 24.04 kOps Cluster Script
+# ✅ Ubuntu 24.04 kOps Cluster Script (FIXED & VERIFIED)
 
 ### (1 Control Plane: `c7i-flex.large`, 2 Workers: `t3.small`)
 
@@ -8,15 +6,15 @@
 
 ## 0️⃣ Prerequisites
 
-* IAM Role **Trusted Entity-EC2, Permission = Admin**
+* IAM Role **Trusted Entity = EC2**, **Permissions = AdministratorAccess**
 * Public subnets with **Internet Gateway** in:
 
   * `ap-south-1a`
   * `ap-south-1b`
 * Bootstrap EC2 Security Group:
 
-  * SSH (22) from **your IP**
-  * HTTPS (443) from `0.0.0.0/0`
+  * SSH (22) → **Your IP**
+  * HTTPS (443) → `0.0.0.0/0`
 
 ---
 
@@ -38,44 +36,51 @@
 ## 2️⃣ Install kubectl & kOps (STABLE)
 
 ```bash
-# kubectl
+# Switch to root
 sudo -i
-apt update
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-chmod +x kubectl
-sudo mv kubectl /usr/local/bin/kubectl
 
-# kOps (stable)
+apt update -y
+apt install -y curl wget
+
+# kubectl (stable)
+curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+mv kubectl /usr/local/bin/kubectl
+
+# kOps (LATEST STABLE)
 curl -LO https://github.com/kubernetes/kops/releases/download/v1.30.0/kops-linux-amd64
 chmod +x kops-linux-amd64
-sudo mv kops-linux-amd64 /usr/local/bin/kops
+mv kops-linux-amd64 /usr/local/bin/kops
 
+exit
 ```
 
-## Verify 
+### Verify
+
 ```bash
-# Verify
 kubectl version --client
 kops version
 ```
 
 ---
 
-## 3️⃣ Configure Aliases
+## 3️⃣ Configure Aliases (NON-ROOT USER)
 
 ```bash
 echo 'alias k=kubectl' >> ~/.bashrc
 echo 'alias kp="kubectl get pods -A"' >> ~/.bashrc
-echo 'export PATH=$PATH:/usr/local/bin/' >> ~/.bashrc
+echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
 source ~/.bashrc
 ```
 
 ---
 
-## 4️⃣ Generate SSH Key
+## 4️⃣ Generate SSH Key (REQUIRED)
 
 ```bash
 ssh-keygen -t rsa -b 4096 -f ~/.ssh/my-keypair -N ""
+
+chmod 600 ~/.ssh/my-keypair
 chmod 644 ~/.ssh/my-keypair.pub
 ```
 
@@ -86,9 +91,11 @@ chmod 644 ~/.ssh/my-keypair.pub
 ```bash
 sudo apt update
 sudo apt install -y unzip curl
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
 unzip awscliv2.zip
 sudo ./aws/install
+
 aws --version
 ```
 
@@ -109,9 +116,16 @@ aws s3api put-bucket-versioning \
 export KOPS_STATE_STORE=s3://user-kops-state-987654321
 ```
 
+(Optional but recommended)
+
+```bash
+echo 'export KOPS_STATE_STORE=s3://user-kops-state-987654321' >> ~/.bashrc
+source ~/.bashrc
+```
+
 ---
 
-## 7️⃣ Create Cluster
+## 7️⃣ Create Cluster (PINNED & STABLE)
 
 ```bash
 kops create cluster \
@@ -126,12 +140,13 @@ kops create cluster \
   --ssh-public-key=~/.ssh/my-keypair.pub \
   --networking=calico \
   --topology=public \
-  --dns=none
+  --dns=none \
+  --kubernetes-version=1.29.4
 ```
 
 ---
 
-## 8️⃣ Apply Cluster (CREATE AWS RESOURCES)
+## 8️⃣ Apply Cluster (CREATES AWS RESOURCES)
 
 ```bash
 kops update cluster mycluster.k8s.local --yes --admin
@@ -151,7 +166,7 @@ kops update cluster mycluster.k8s.local --yes --admin
 kops validate cluster --wait 10m
 ```
 
-✅ Success message:
+✅ Expected output:
 
 ```
 Your cluster mycluster.k8s.local is ready
@@ -162,16 +177,10 @@ Your cluster mycluster.k8s.local is ready
 ## 🔟 Verify Cluster State
 
 ```bash
-# List clusters
-kops get cluster
-
-# List instance groups
+kops get clusters
 kops get ig
 
-# Verify nodes
 kubectl get nodes -o wide
-
-# Verify all system pods
 kubectl get pods -A
 ```
 
@@ -181,6 +190,7 @@ kubectl get pods -A
 
 ```bash
 kops edit cluster mycluster.k8s.local
+
 kops edit ig nodes-ap-south-1a --name=mycluster.k8s.local
 kops edit ig control-plane-ap-south-1a --name=mycluster.k8s.local
 ```
@@ -197,13 +207,11 @@ kops update cluster --yes
 
 ```bash
 kops delete cluster --name mycluster.k8s.local --yes
+
 aws s3 rb s3://user-kops-state-987654321 --force
 
-kops validate cluster
-# should return: Cluster not found
-
-#Also check:
 kops get clusters
+# cluster should NOT appear
 ```
 
 ---
