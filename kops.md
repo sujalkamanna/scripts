@@ -213,5 +213,84 @@ aws s3 rb s3://user-kops-state-987654321 --force
 kops get clusters
 # cluster should NOT appear
 ```
+---
+## 1️⃣ Delete Kubernetes Cluster (MANDATORY)
+
+```bash
+kops delete cluster --name mycluster.k8s.local --yes
+```
+
+⏳ Wait until command completes.
+
+---
+
+## 2️⃣ Verify Cluster Is Gone
+
+```bash
+kops get clusters
+```
+
+Expected:
+
+```
+No clusters found
+```
+
+---
+
+## 3️⃣ Remove kOps State Store (S3)
+
+⚠️ **Do this ONLY after cluster deletion succeeds**
+
+```bash
+aws s3 rb s3://user-kops-state-987654321 --force
+```
+
+---
+
+## 4️⃣ Optional: Cleanup Local Artifacts
+
+```bash
+# Remove kubeconfig context
+kubectl config delete-context mycluster.k8s.local
+kubectl config delete-cluster mycluster.k8s.local
+kubectl config delete-user mycluster.k8s.local
+```
+
+---
+
+## 5️⃣ Optional: Remove Tools (Bootstrap Cleanup)
+
+```bash
+sudo rm -f /usr/local/bin/kubectl
+sudo rm -f /usr/local/bin/kops
+sudo rm -rf ~/.kube
+```
+
+---
+
+## 6️⃣ Final Sanity Check
+
+```bash
+kops get clusters
+aws ec2 describe-instances --region ap-south-1
+```
+
+Expected:
+
+* No kOps cluster listed
+* No EC2 instances with cluster tags
+
+---
+
+## ✅ BEST PRACTICE TIP (OPTIONAL ADD)
+
+Add this comment **at the top of your install file**:
+
+```bash
+# IMPORTANT:
+# This file contains both CREATE and DESTROY commands.
+# Review carefully before executing.
+```
 
 ---
