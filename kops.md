@@ -45,10 +45,11 @@ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stabl
 chmod +x kubectl
 sudo mv kubectl /usr/local/bin/kubectl
 
-# kOps (stable – DO NOT use alpha)
-wget https://github.com/kubernetes/kops/releases/download/v1.29.4/kops-linux-amd64
+# kOps (stable)
+curl -LO https://github.com/kubernetes/kops/releases/download/v1.30.0/kops-linux-amd64
 chmod +x kops-linux-amd64
 sudo mv kops-linux-amd64 /usr/local/bin/kops
+
 ```
 
 ## Verify 
