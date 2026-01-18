@@ -1,5 +1,3 @@
----
-
 # **Kubernetes Cluster Setup on Ubuntu 24.04 (Master + Worker Nodes)**
 
 ## Overview
@@ -39,6 +37,16 @@ The scripts handle:
 | `k8-common-script` | Installs prerequisites, containerd, and Kubernetes components on all nodes        |
 | `k8-master-script` | Initializes the master node, deploys Flannel CNI, prints join command for workers |
 | `k8-slave-script`  | Joins worker node to the cluster using join command from master                   |
+
+```bash
+curl -O https://raw.githubusercontent.com/sujalkamanna/scripts/refs/heads/main/k8-common-script
+```
+```bash
+curl -O https://raw.githubusercontent.com/sujalkamanna/scripts/refs/heads/main/k8-master-script
+```
+```bash
+curl -O https://raw.githubusercontent.com/sujalkamanna/scripts/refs/heads/main/k8-slave-script
+```
 
 ---
 
