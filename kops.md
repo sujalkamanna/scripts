@@ -1,4 +1,4 @@
-# ✅ Ubuntu 24.04 kOps Cluster Script (FIXED & VERIFIED)
+# kOps Kubernetes Cluster Installation Guide (Ubuntu 24.04 | AWS)
 
 ### (1 Control Plane: `c7i-flex.large`, 2 Workers: `t3.small`)
 
@@ -6,15 +6,14 @@
 
 ## 0️⃣ Prerequisites
 
-* IAM Role **Trusted Entity = EC2**, **Permissions = AdministratorAccess**
 * Public subnets with **Internet Gateway** in:
-
   * `ap-south-1a`
   * `ap-south-1b`
-* Bootstrap EC2 Security Group:
 
+* Bootstrap EC2 Security Group:
   * SSH (22) → **Your IP**
-  * HTTPS (443) → `0.0.0.0/0`
+  * (Optional) HTTP (80) → 0.0.0.0/0
+  * (Optional) HTTPS (443) → 0.0.0.0/0
 
 ---
 
@@ -22,18 +21,17 @@
 
 * OS: **Ubuntu 24.04**
 * Instance Type: **t3.micro**
-* IAM Role: **TE-EC2-Admin**
 * Security Group rules:
 
 | Protocol | Port | Source               |
 | -------- | ---- | -------------------- |
 | SSH      | 22   | Your IP              |
-| HTTPS    | 443  | 0.0.0.0/0            |
 | HTTP     | 80   | 0.0.0.0/0 (optional) |
-
+| HTTPS    | 443  | 0.0.0.0/0 (optional) |
+* IAM Role With admin access
 ---
 
-## 2️⃣ Install kubectl & kOps (STABLE)
+## 2️⃣ Install `kubectl` & `kOps`
 
 ```bash
 # Switch to root
@@ -47,13 +45,13 @@ curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.
 chmod +x kubectl
 mv kubectl /usr/local/bin/kubectl
 
-# kOps (LATEST STABLE)
+# kOps (latest stable release)
 curl -LO https://github.com/kubernetes/kops/releases/download/v1.30.0/kops-linux-amd64
 chmod +x kops-linux-amd64
 mv kops-linux-amd64 /usr/local/bin/kops
 
 exit
-```
+````
 
 ### Verify
 
@@ -64,7 +62,7 @@ kops version
 
 ---
 
-## 3️⃣ Configure Aliases (NON-ROOT USER)
+## 3️⃣ Configure Aliases (Non-Root)
 
 ```bash
 echo 'alias k=kubectl' >> ~/.bashrc
@@ -75,7 +73,7 @@ source ~/.bashrc
 
 ---
 
-## 4️⃣ Generate SSH Key (REQUIRED)
+## 4️⃣ Generate SSH Key (Required)
 
 ```bash
 ssh-keygen -t rsa -b 4096 -f ~/.ssh/my-keypair -N ""
@@ -114,22 +112,25 @@ aws s3api put-bucket-versioning \
   --versioning-configuration Status=Enabled
 
 export KOPS_STATE_STORE=s3://user-kops-state-987654321
+export AWS_REGION=ap-south-1
 ```
 
 (Optional but recommended)
 
 ```bash
 echo 'export KOPS_STATE_STORE=s3://user-kops-state-987654321' >> ~/.bashrc
+echo 'export AWS_REGION=ap-south-1' >> ~/.bashrc
 source ~/.bashrc
 ```
 
 ---
 
-## 7️⃣ Create Cluster (PINNED & STABLE)
+## 7️⃣ Create Cluster
 
 ```bash
 kops create cluster \
   --name=mycluster.k8s.local \
+  --cloud=aws \
   --zones=ap-south-1a,ap-south-1b \
   --control-plane-count=1 \
   --control-plane-size=c7i-flex.large \
@@ -146,21 +147,17 @@ kops create cluster \
 
 ---
 
-## 8️⃣ Apply Cluster (CREATES AWS RESOURCES)
+## 8️⃣ Apply Cluster (Create AWS Resources)
 
 ```bash
 kops update cluster mycluster.k8s.local --yes --admin
 ```
 
-⏳ Wait **5–10 minutes** for:
-
-* Control plane EC2
-* etcd
-* Network Load Balancer
+⏳ It can take **5–10 minutes** for the cluster to become ready.
 
 ---
 
-## 9️⃣ Validate Cluster (MANDATORY)
+## 9️⃣ Validate Cluster
 
 ```bash
 kops validate cluster --wait 10m
@@ -182,6 +179,7 @@ kops get ig
 
 kubectl get nodes -o wide
 kubectl get pods -A
+kubectl config current-context
 ```
 
 ---
@@ -195,7 +193,7 @@ kops edit ig nodes-ap-south-1a --name=mycluster.k8s.local
 kops edit ig control-plane-ap-south-1a --name=mycluster.k8s.local
 ```
 
-Apply changes:
+After editing:
 
 ```bash
 kops update cluster --yes
@@ -203,28 +201,19 @@ kops update cluster --yes
 
 ---
 
-## 1️⃣2️⃣ Cleanup (DESTROY EVERYTHING)
+## ⚠️ Cleanup (Remove Cluster and State Store)
 
-```bash
-kops delete cluster --name mycluster.k8s.local --yes
-
-aws s3 rb s3://user-kops-state-987654321 --force
-
-kops get clusters
-# cluster should NOT appear
-```
----
-## 1️⃣ Delete Kubernetes Cluster (MANDATORY)
+1️⃣ **Delete Kubernetes Cluster**
 
 ```bash
 kops delete cluster --name mycluster.k8s.local --yes
 ```
 
-⏳ Wait until command completes.
+⏳ Wait until completion.
 
 ---
 
-## 2️⃣ Verify Cluster Is Gone
+2️⃣ **Verify Cluster Is Gone**
 
 ```bash
 kops get clusters
@@ -238,9 +227,9 @@ No clusters found
 
 ---
 
-## 3️⃣ Remove kOps State Store (S3)
+3️⃣ **Remove kOps State Store (S3)**
 
-⚠️ **Do this ONLY after cluster deletion succeeds**
+⚠️ Do this **only after cluster deletion succeeds**
 
 ```bash
 aws s3 rb s3://user-kops-state-987654321 --force
@@ -248,7 +237,7 @@ aws s3 rb s3://user-kops-state-987654321 --force
 
 ---
 
-## 4️⃣ Optional: Cleanup Local Artifacts
+4️⃣ **Optional: Cleanup Local Artifacts**
 
 ```bash
 # Remove kubeconfig context
@@ -259,7 +248,7 @@ kubectl config delete-user mycluster.k8s.local
 
 ---
 
-## 5️⃣ Optional: Remove Tools (Bootstrap Cleanup)
+5️⃣ **Optional: Remove Tools (Bootstrap Cleanup)**
 
 ```bash
 sudo rm -f /usr/local/bin/kubectl
@@ -269,7 +258,7 @@ sudo rm -rf ~/.kube
 
 ---
 
-## 6️⃣ Final Sanity Check
+6️⃣ **Final Sanity Check**
 
 ```bash
 kops get clusters
@@ -278,19 +267,17 @@ aws ec2 describe-instances --region ap-south-1
 
 Expected:
 
-* No kOps cluster listed
+* No kOps clusters listed
 * No EC2 instances with cluster tags
 
 ---
 
-## ✅ BEST PRACTICE TIP (OPTIONAL ADD)
+## 📌 BEST PRACTICE TIP (Optional)
 
-Add this comment **at the top of your install file**:
+Add this comment at the top of your install file:
 
 ```bash
 # IMPORTANT:
 # This file contains both CREATE and DESTROY commands.
 # Review carefully before executing.
 ```
-
----
