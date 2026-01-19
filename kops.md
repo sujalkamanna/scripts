@@ -1,6 +1,6 @@
 # kOps Kubernetes Cluster Installation Guide (Ubuntu 24.04 | AWS)
 
-### (1 Control Plane: `c7i-flex.large`, 2 Workers: `t3.small`)
+### (1 Control Plane: `t3.small`, 2 Workers: `t3.micro`)
 
 ---
 
@@ -66,7 +66,8 @@ kops version
 
 ```bash
 echo 'alias k=kubectl' >> ~/.bashrc
-echo 'alias kp="kubectl get pods -A"' >> ~/.bashrc
+echo 'alias kp="kubectl get pods"' >> ~/.bashrc
+echo 'alias kn="kubectl get nodes"' >> ~/.bashrc
 echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
 source ~/.bashrc
 ```
@@ -133,9 +134,9 @@ kops create cluster \
   --cloud=aws \
   --zones=ap-south-1a,ap-south-1b \
   --control-plane-count=1 \
-  --control-plane-size=c7i-flex.large \
+  --control-plane-size=t3.small \
   --node-count=2 \
-  --node-size=t3.small \
+  --node-size=t3.micro \
   --node-volume-size=20 \
   --control-plane-volume-size=20 \
   --ssh-public-key=~/.ssh/my-keypair.pub \
@@ -143,6 +144,7 @@ kops create cluster \
   --topology=public \
   --dns=none \
   --kubernetes-version=1.29.4
+
 ```
 
 ---
