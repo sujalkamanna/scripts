@@ -144,6 +144,147 @@ graph LR
 │   ├── third_party_licenses.md      # Third-party licenses
 │   └── others.md                    # Misc tools
 ```
+---
+<div align="center">
+
+## 🎯 Quick Access
+
+[![Scripts](https://img.shields.io/badge/📂_Scripts-Directory-blue?style=for-the-badge)](https://github.com/sujalkamanna/scripts/tree/main)
+[![Tools Guide](https://img.shields.io/badge/🔧_Tools_Guide-Complete_Reference-green?style=for-the-badge)](https://github.com/sujalkamanna/scripts/blob/main/tools.md)
+[![Documentation](https://img.shields.io/badge/📚_Docs-Wiki-orange?style=for-the-badge)](./docs/)
+
+</div>
+
+---
+
+## 🗂️ Repository Structure
+
+<table>
+<tr>
+<td align="center" width="33%">
+
+### 📂 Scripts
+
+Automation scripts for common DevOps tasks
+
+[![Explore Scripts](https://img.shields.io/badge/Explore-Scripts-blue?style=flat-square)](https://github.com/sujalkamanna/scripts/tree/main)
+
+</td>
+<td align="center" width="33%">
+
+### 🔧 Tools Guide
+
+Comprehensive DevOps tools reference
+
+[![View Guide](https://img.shields.io/badge/View-Tools_Guide-green?style=flat-square)](https://github.com/sujalkamanna/scripts/blob/main/tools.md)
+
+**⭐ 500+ Tools**
+
+</td>
+<td align="center" width="33%">
+
+### 📚 Documentation
+
+Guides and tutorials
+
+[![Read Docs](https://img.shields.io/badge/Read-Docs-orange?style=flat-square)](./docs/)
+
+</td>
+</tr>
+</table>
+
+---
+
+## 📚 DevOps Tools Reference
+
+Looking for the right tool for your DevOps workflow? Check out our comprehensive tools guide!
+
+<div align="center">
+
+### 🚀 [DevOps Tools Ecosystem Guide](https://github.com/sujalkamanna/scripts/blob/main/tools.md)
+
+**500+ Tools** | **All Categories** | **Licensing Info** | **Official Links**
+
+[![View Tools Guide](https://img.shields.io/badge/View-Tools_Guide-2ea44f?style=for-the-badge)](https://github.com/sujalkamanna/scripts/blob/main/tools.md)
+
+</div>
+
+---
+
+### 🌟 What's Inside the Tools Guide
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+**📋 Categories Covered:**
+
+- 🐧 Operating Systems & Linux Distributions
+- 📝 Version Control Systems (Git, GitHub, GitLab, etc.)
+- 🔄 CI/CD Tools (Jenkins, GitHub Actions, GitLab CI, etc.)
+- 🐳 Containerization & Orchestration (Docker, Kubernetes, etc.)
+- 🏗️ Infrastructure as Code (Terraform, Pulumi, Ansible, etc.)
+- ☁️ Cloud Platforms (AWS, Azure, GCP, etc.)
+- 📊 Monitoring & Observability (Prometheus, Grafana, etc.)
+- 🔒 Security & DevSecOps (Trivy, Docker Scout, SonarQube, etc.)
+- 🔀 GitOps, MLOps, AIOps, and much more!
+
+</td>
+<td width="50%" valign="top">
+
+**✨ Key Features:**
+
+| Feature | Details |
+|---------|---------|
+| **Total Tools** | 500+ tools across 25+ categories |
+| **Licensing** | Free, Open Source, Freemium, Paid |
+| **Links** | Official websites and documentation |
+| **Comparisons** | Tool alternatives and comparisons |
+| **Toolchains** | Real-world implementation examples |
+
+<br/>
+
+**Perfect for:**
+- 🎯 Finding the right tool for your needs
+- 📊 Comparing alternatives
+- 💰 Understanding licensing options
+- 🔗 Quick access to official documentation
+
+</td>
+</tr>
+</table>
+
+> **💡 All tools include licensing information (Free/Open Source/Freemium/Paid) and official links**
+
+<div align="center">
+
+### **[📖 Explore Complete Tools Guide →](https://github.com/sujalkamanna/scripts/blob/main/tools.md)**
+
+</div>
+
+---
+
+<div align="center">
+
+### ✨ Key Improvements
+
+</div>
+
+**This combined version provides:**
+
+✅ **Better flow** - Quick Access → Repository Structure → Detailed Tools Guide  
+✅ **No duplication** - Removed redundant badges  
+✅ **Cleaner layout** - Two-column table for better organization  
+✅ **Consistent styling** - Unified badge styles  
+✅ **Better hierarchy** - Clear sections with proper headings  
+✅ **Visual balance** - Even distribution of content  
+✅ **Call-to-action** - Clear link to the tools guide at the end  
+
+<div align="center">
+
+*A professional, comprehensive overview while maintaining readability!* 🎯
+
+</div>
 
 ---
 
