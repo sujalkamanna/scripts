@@ -3,22 +3,28 @@ set -e
 
 echo "Updating system packages..."
 sudo apt update -y
-sudo apt upgrade -y
 
-echo "Installing dependencies..."
-sudo apt install -y unzip curl git
+echo "Installing dependencies (curl, jq)..."
+sudo apt install -y curl jq
 
-# Download latest Terraformer release
-TERRAFORMER_VERSION="0.17.10"  # Change to latest if needed
-echo "Downloading Terraformer version $TERRAFORMER_VERSION..."
-curl -LO https://github.com/GoogleCloudPlatform/terraformer/releases/download/$TERRAFORMER_VERSION/terraformer-all-linux-amd64.zip
+echo "Fetching latest Terraformer version from GitHub..."
+LATEST_TAG=$(curl -s https://api.github.com/repos/GoogleCloudPlatform/terraformer/releases/latest | jq -r '.tag_name')
 
-echo "Extracting Terraformer..."
-unzip terraformer-all-linux-amd64.zip
-sudo mv terraformer /usr/local/bin/
-rm terraformer-all-linux-amd64.zip
+echo "Latest Terraformer release tag: $LATEST_TAG"
 
-echo "Verifying Terraformer installation..."
+echo "Downloading Terraformer binary for Linux AMD64..."
+curl -LO "https://github.com/GoogleCloudPlatform/terraformer/releases/download/${LATEST_TAG}/terraformer-all-linux-amd64"
+
+echo "Making Terraformer executable..."
+chmod +x terraformer-all-linux-amd64
+
+echo "Moving Terraformer to /usr/local/bin..."
+sudo mv terraformer-all-linux-amd64 /usr/local/bin/terraformer
+
+echo "Sleeping for 2 seconds..."
+sleep 2
+
+echo "Installed Terraformer version:"
 terraformer --version
 
-echo "Terraformer installed successfully!"
+echo "Terraformer installation completed successfully!"
