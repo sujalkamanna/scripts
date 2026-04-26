@@ -1,0 +1,44 @@
+MIT License
+
+Copyright (c) 2025 sujalkamanna
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+**1. The above copyright notice and this permission notice shall be included
+   in all copies or substantial portions of the Software.**
+
+**2. The following acknowledgment is hereby made regarding external tools,
+   installation guides, software, and components referenced in this project:**
+   
+   **- This repository may reference third‑party open source projects,
+     installation guides, scripts, and documentation hosted by external
+     communities, organizations, or open source projects.**
+   
+   **- Any URLs, installation guides, and documentation linked from this
+     repository belong to their respective owners and are not claimed to be
+     owned by the copyright holder of this repository.**
+
+   **- All trademarks, service marks, and trade names referenced in this
+     repository are the property of their respective owners.**
+
+   **- Use of any installation guide URLs, Docker files, Kubernetes scripts,
+     Jenkins pipelines, Terraform guides, or related content is subject to
+     the terms of the respective upstream project’s license and terms of use.**
+
+**3. By using or distributing this Software, you agree and acknowledge that
+   you are responsible for your own compliance with any third‑party license
+   terms applicable to the content or software you use, reference, or deploy
+   based on this repository.**
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE SOFTWARE.
