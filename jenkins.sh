@@ -3,85 +3,73 @@
 set -e
 
 #==========================================================
-# Jenkins Installation Script (Ubuntu / Debian)
-# Installs: Git, Maven, Java 21, Jenkins
+# Jenkins Installation Script (Official + Clean)
 #==========================================================
 
-# Variables
 JENKINS_PORT=8080
-PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 || echo localhost)
-JENKINS_URL="http://${PUBLIC_IP}:${JENKINS_PORT}"
-JAVA_VERSION="21"
 
-#==========================================================
-# STEP 1: Install Git, Maven, Curl, and unzip
-#==========================================================
-echo "🔧 Installing Git, Maven, Curl, and unzip..."
+echo "🔄 Updating system..."
 sudo apt update -y
-sudo apt install -y git maven curl unzip
 
 #==========================================================
-# STEP 2: Install Java $JAVA_VERSION
+# STEP 1: Install Java (Required)
 #==========================================================
-echo "☕ Installing Java $JAVA_VERSION..."
-sudo apt update -y
-sudo apt install -y openjdk-${JAVA_VERSION}-jdk fontconfig
+echo "☕ Installing OpenJDK 21..."
+sudo apt install -y openjdk-21-jdk
 
-# Verify Java installation
-echo "💻 Verifying Java installation..."
+# Verify Java
+echo "🔍 Java version:"
 java -version
-javac -version
-
-# Set JAVA_HOME
-JAVA_HOME_PATH=$(readlink -f /usr/bin/java | sed "s:bin/java::")
-echo "export JAVA_HOME=${JAVA_HOME_PATH}" | sudo tee /etc/profile.d/java.sh
-source /etc/profile.d/java.sh
-
-echo "✅ JAVA_HOME set to: $JAVA_HOME"
 
 #==========================================================
-# STEP 3: Add Jenkins Repository
+# STEP 2: Add Jenkins Repository & Key
 #==========================================================
 echo "📦 Adding Jenkins repository..."
-curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
 
-echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
-  https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo mkdir -p /etc/apt/keyrings
+
+# Add key
+sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+
+# Add repo
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] \
+https://pkg.jenkins.io/debian-stable binary/" | sudo tee \
+/etc/apt/sources.list.d/jenkins.list > /dev/null
 
 #==========================================================
-# STEP 4: Install Jenkins
+# STEP 3: Install Jenkins
 #==========================================================
 echo "📥 Installing Jenkins..."
 sudo apt update -y
 sudo apt install -y jenkins
 
 #==========================================================
-# STEP 5: Start Jenkins
+# STEP 4: Start and Enable Jenkins
 #==========================================================
-echo "🚀 Starting Jenkins..."
-sudo systemctl start jenkins
+echo "🚀 Starting Jenkins service..."
 sudo systemctl enable jenkins
+sudo systemctl start jenkins
 
 #==========================================================
-# STEP 6: Configure Firewall (optional)
+# STEP 5: Configure Firewall (Optional)
 #==========================================================
-echo "🛡 Configuring firewall to allow port ${JENKINS_PORT}..."
+echo "🛡 Opening port ${JENKINS_PORT}..."
 sudo ufw allow ${JENKINS_PORT} || true
 
 #==========================================================
-# STEP 7: Display Jenkins Status and Initial Admin Password
+# STEP 6: Status & Access Info
 #==========================================================
-echo "✅ Jenkins service status:"
+echo "✅ Jenkins Status:"
 sudo systemctl is-active jenkins
 
-echo "➡ Jenkins URL: ${JENKINS_URL}"
-echo "🔑 Initial admin password:"
+echo ""
+echo "🌐 Access Jenkins at:"
+echo "http://localhost:${JENKINS_PORT}"
+
+echo ""
+echo "🔑 Initial Admin Password:"
 sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 
-#==========================================================
-# STEP 8: Optional Notes
-#==========================================================
-echo "💡 Notes:"
-echo "- Visit the URL above to unlock Jenkins and install recommended plugins."
-echo "- Git and Maven are installed for building Java projects."
-echo "- Java $JAVA_VERSION is installed and JAVA_HOME is set."
+echo ""
+echo "🎉 Jenkins installation completed!"

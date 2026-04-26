@@ -1,5 +1,3 @@
-
-
 # Prometheus Monitoring Setup on AWS EC2
 
 This guide explains how to set up **Prometheus** on a monitoring server and **Node Exporter + Blackbox Exporter** on web servers. All steps include running the services in the background using `nohup`.

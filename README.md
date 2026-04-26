@@ -33,6 +33,94 @@ graph LR
 
 ---
 
+## 📌 Quick Navigation
+
+### 🐳 Docker
+
+* [Docker Installation](./docker.sh)
+* [Docker Compose Setup](./docker-compose.sh)
+* [Docker Swarm Guide](./docker-swarm.md)
+
+---
+
+### ☸️ Kubernetes
+
+* [Kubernetes Master Setup](./k8-master-script.sh)
+* [Kubernetes Worker Setup](./k8-slave-script.sh)
+* [Common Kubernetes Script](./k8-common-script.sh)
+* [Kubernetes Documentation](./k8-README.md)
+* [Minikube Setup](./minikube.sh)
+
+---
+
+### ⚙️ CI/CD Tools
+
+* [Jenkins Installation Script](./jenkins.sh)
+* [Jenkins Pipeline (Groovy)](./jenkins_pipeline.groovy)
+* [GitHub Actions Self Hosted Runner](./github-actions-self-hosted.md)
+
+---
+
+### 🧪 Infrastructure as Code
+
+* [Terraform Guide](./terraform.md)
+* [Terraform Automation Script](./terraformer.sh)
+
+---
+
+### 🐧 Configuration Management
+
+* [Ansible Master Setup](./ansible_master_script.sh)
+* [Ansible Slave Setup](./ansible_slave_scripts.sh)
+* [Ansible Configuration Guide](./ansible_configuration.md)
+
+---
+
+### ☁️ Cloud & DevOps Tools
+
+* [AWS CLI Guide](./aws-cli.md)
+* [ArgoCD Guide](./argocd.md)
+* [Kops Cluster Setup](./kops.md)
+
+---
+
+### 📊 Monitoring & Observability
+
+* [Prometheus Setup](./prometheus.md)
+* [Grafana Setup](./grafana.md)
+* [Prometheus + Grafana Stack](./prometheus_grafana.md)
+
+---
+
+### 🖥️ Application Servers
+
+* [Tomcat Installation Script](./tomcat.sh)
+
+---
+
+## 📄 Documentation
+
+* [Main README](./README.md)
+* [Changelog](./CHANGELOG.md)
+* [Tools List](./tools.md)
+* [Other Notes](./others.md)
+* [License](./LICENSE)
+* [Third Party Licenses](./third_party_licenses.md)
+
+---
+
+## 🚀 How to Use
+
+1. Click any link above
+2. It will open the file directly in GitHub
+3. Clone repo to run scripts locally:
+
+```bash
+git clone https://github.com/sujalkamanna/scripts
+```
+
+---
+
 ## ✨ Features
 
 <table>

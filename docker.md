@@ -7,6 +7,10 @@
 
 You can download the script using **curl**:
 
+or use
+
+```sudo apt-get install docker.io```
+
 ```bash
 curl -O https://raw.githubusercontent.com/sujalkamanna/scripts/main/docker.sh
 ````

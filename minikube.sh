@@ -1,74 +1,110 @@
-# copy to download file directly
-# wget https://raw.githubusercontent.com/sujalkamanna/scripts/main/minikube.sh
-
 #!/bin/bash
+
 set -e
 
-### CONFIGURATION - EDIT IF NEEDED ###
+### CONFIGURATION ###
 NEW_USER="minikubeuser"
 NEW_PASS="minikubeuser"
-#######################################
+######################
 
-# Check for root
+# Check root
 if [ "$EUID" -ne 0 ]; then
-  echo "Please run this script with sudo or as root."
+  echo "❌ Run as root or sudo"
   exit 1
 fi
 
-echo "### Updating system packages..."
+echo "### Updating system..."
 apt update -y
 
-echo "### Installing required tools..."
-apt install -y curl ca-certificates gnupg lsb-release sudo
+echo "### Installing base dependencies..."
+apt install -y curl ca-certificates gnupg lsb-release sudo apt-transport-https
 
-echo "### Installing Docker (latest stable)..."
-curl -fsSL https://get.docker.com | sh
+#==========================================================
+# DOCKER INSTALL (official repo method - stable)
+#==========================================================
+echo "### Installing Docker..."
+
+install -m 0755 -d /etc/apt/keyrings
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+  | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo \
+"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" \
+| tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+apt update -y
+apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
 systemctl enable --now docker
 
-echo "### Creating new user: $NEW_USER"
-useradd -m -s /bin/bash "$NEW_USER" || true
+#==========================================================
+# USER SETUP
+#==========================================================
+echo "### Creating user: $NEW_USER"
+
+id "$NEW_USER" &>/dev/null || useradd -m -s /bin/bash "$NEW_USER"
 echo "$NEW_USER:$NEW_PASS" | chpasswd
 
-echo "### Adding $NEW_USER to sudo & docker group..."
 usermod -aG sudo "$NEW_USER"
 usermod -aG docker "$NEW_USER"
 
-echo "### Installing Minikube (latest)..."
-curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-install minikube-linux-amd64 /usr/local/bin/minikube
-rm minikube-linux-amd64
+#==========================================================
+# MINIKUBE INSTALL
+#==========================================================
+echo "### Installing Minikube..."
 
-echo "### Installing kubectl (latest stable)..."
+curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+install minikube /usr/local/bin/minikube
+rm -f minikube
+
+#==========================================================
+# KUBECTL INSTALL
+#==========================================================
+echo "### Installing kubectl..."
+
 KUBECTL_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+
 curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
 curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
-echo "$(cat kubectl.sha256) kubectl" | sha256sum --check
-install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-rm kubectl kubectl.sha256
 
-echo "### Versions installed:"
+echo "$(cat kubectl.sha256) kubectl" | sha256sum --check
+
+install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+rm -f kubectl kubectl.sha256
+
+#==========================================================
+# VERIFY INSTALLATIONS
+#==========================================================
+echo "### Installed versions:"
 docker --version
 minikube version
 kubectl version --client
 
-echo ""
-echo "### Starting Minikube as $NEW_USER..."
-sudo -H -u "$NEW_USER" bash << EOF
-# ensure docker group refresh
-newgrp docker << EEND
-echo "Running minikube start..."
-minikube start --driver=docker
-EEND
-EOF
+#==========================================================
+# START MINIKUBE (proper user execution)
+#==========================================================
+echo "### Starting Minikube..."
 
+sudo -u "$NEW_USER" -H bash -c "
+export HOME=/home/$NEW_USER
+minikube start --driver=docker
+"
+
+#==========================================================
+# DONE
+#==========================================================
 echo ""
-echo "### Setup complete!"
-echo "User:     $NEW_USER"
+echo "### Setup Complete!"
+echo "User: $NEW_USER"
 echo "Password: $NEW_PASS"
 echo ""
-echo "To use kubectl, switch to the new user:"
-echo "   su - $NEW_USER"
-echo "Then try:"
-echo "   kubectl get nodes"
+echo "Switch user:"
+echo "  su - $NEW_USER"
 echo ""
-echo "Done!"
+echo "Check cluster:"
+echo "  kubectl get nodes"
