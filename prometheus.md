@@ -1,143 +1,317 @@
-# Prometheus Monitoring Setup on AWS EC2
+---
 
-This guide explains how to set up **Prometheus** on a monitoring server and **Node Exporter + Blackbox Exporter** on web servers. All steps include running the services in the background using `nohup`.
+# 📄 Prometheus Monitoring Setup on AWS EC2 (Production Guide)
+
+This guide explains a **working AWS monitoring architecture** using:
+
+* 🖥️ **Monitoring Server (Prometheus + Grafana)**
+* 🌐 **Application/Web Server (Node Exporter + Blackbox Exporter)**
 
 ---
 
-## **Server 1: Monitoring Server (Prometheus only)**
+# 🏗️ Architecture Overview
 
-### **Prerequisites**
+## 🖥️ Monitoring Server
 
-* EC2 Linux instance (Ubuntu / Amazon Linux 2)
-* Security group must allow:
+**Role:** Central monitoring system
+**Runs:**
 
-  * SSH (22)
-  * Prometheus (9090)
+* Prometheus (9090)
+* Grafana (3000)
 
 ---
 
-### **Step 1: Install Prometheus**
+## 🌐 Application Server (Web Server)
 
-```bash
-wget https://github.com/prometheus/prometheus/releases/download/v2.45.0/prometheus-2.45.0.linux-amd64.tar.gz
-tar xvf prometheus-2.45.0.linux-amd64.tar.gz
-cd prometheus-2.45.0.linux-amd64
+**Role:** Target machine to monitor
+**Runs:**
+
+* Node Exporter (9100)
+* Blackbox Exporter (9115)
+
+---
+
+# 🔐 AWS Security Group Setup
+
+---
+
+## 🖥️ Monitoring Server SG
+
+Inbound:
+
+```
+SSH (22)      → Your IP
+Prometheus    → 9090 (Your IP only)
+Grafana       → 3000 (Your IP only)
+```
+
+Outbound:
+
+```
+All traffic allowed
 ```
 
 ---
 
-### **Step 2: Run Prometheus in the background**
+## 🌐 Application Server SG
 
-```bash
-nohup prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/var/lib/prometheus >> /var/log/prometheus.log 2>&1 &
+Inbound:
+
+```
+SSH (22)            → Your IP
+Node Exporter 9100  → 0.0.0.0/0 (testing) OR Prometheus SG
+Blackbox 9115       → 0.0.0.0/0 (testing) OR Prometheus SG
+```
+
+Outbound:
+
+```
+All traffic allowed
 ```
 
 ---
 
-### **Step 3: Prometheus Configuration**
+# 🖥️ MONITORING SERVER (Prometheus + Grafana)
 
-Create or edit `/etc/prometheus/prometheus.yml`. Replace `WEB_SERVER_PRIVATE_IP` and `WEB_SERVER_PUBLIC_IP` with the details of your web server.
+---
+
+## 📦 Step 1: Install Prometheus
+
+```bash
+cd /opt
+
+wget https://github.com/prometheus/prometheus/releases/download/v3.2.1/prometheus-3.2.1.linux-amd64.tar.gz
+
+tar -xvf prometheus-3.2.1.linux-amd64.tar.gz
+cd prometheus-3.2.1.linux-amd64
+
+sudo cp prometheus promtool /usr/local/bin/
+```
+
+---
+
+## 📁 Step 2: Create directories
+
+```bash
+sudo mkdir -p /etc/prometheus
+sudo mkdir -p /var/lib/prometheus
+```
+
+---
+
+## ⚙️ Step 3: Prometheus config (IMPORTANT)
+
+```bash
+sudo nano /etc/prometheus/prometheus.yml
+```
+
+---
+
+## ✅ FINAL CONFIG (USE PUBLIC IP ONLY FOR NOW)
 
 ```yaml
 global:
   scrape_interval: 15s
 
 scrape_configs:
-  # Prometheus self metrics
+
+  # -----------------------
+  # Prometheus itself
+  # -----------------------
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
 
-  # Node Exporter on Web server
-  - job_name: 'node_exporter_web'
+  # -----------------------
+  # Node Exporter (APP SERVER)
+  # -----------------------
+  - job_name: 'node_exporter'
     static_configs:
-      - targets: ['WEB_SERVER_PRIVATE_IP:9100']
+      - targets: ['3.108.66.47:9100']
 
-  # Blackbox Exporter on Web server
-  - job_name: 'blackbox_web'
+  # -----------------------
+  # Blackbox Exporter (APP SERVER)
+  # -----------------------
+  - job_name: 'blackbox'
     metrics_path: /probe
     params:
       module: [http_2xx]
+
     static_configs:
       - targets:
-        - http://WEB_SERVER_PUBLIC_IP
+        - http://3.108.66.47
+
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
+
       - source_labels: [__param_target]
         target_label: instance
+
       - target_label: __address__
-        replacement: WEB_SERVER_PRIVATE_IP:9115
+        replacement: 3.108.66.47:9115
 ```
 
 ---
 
-## **Server 2: Web Server (Node Exporter + Blackbox Exporter)**
-
-### **Prerequisites**
-
-* EC2 Linux instance
-* Security group must allow:
-
-  * SSH (22)
-  * Node Exporter (9100)
-  * Blackbox Exporter (9115)
-
----
-
-### **Step 1: Install Node Exporter**
+## 🚀 Step 4: systemd service
 
 ```bash
-wget https://github.com/prometheus/node_exporter/releases/download/v1.6.1/node_exporter-1.6.1.linux-amd64.tar.gz
-tar xvf node_exporter-1.6.1.linux-amd64.tar.gz
-cd node_exporter-1.6.1.linux-amd64
+sudo nano /etc/systemd/system/prometheus.service
 ```
 
-Start Node Exporter in the background:
+```ini
+[Unit]
+Description=Prometheus Monitoring
+After=network.target
 
-```bash
-nohup node_exporter >> /var/log/node_exporter.log 2>&1 &
+[Service]
+ExecStart=/usr/local/bin/prometheus \
+  --config.file=/etc/prometheus/prometheus.yml \
+  --storage.tsdb.path=/var/lib/prometheus
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
 ```
 
 ---
 
-### **Step 2: Install Blackbox Exporter**
+## ▶️ Step 5: Start Prometheus
 
 ```bash
-wget https://github.com/prometheus/blackbox_exporter/releases/download/v0.25.0/blackbox_exporter-0.25.0.linux-amd64.tar.gz
-tar xvf blackbox_exporter-0.25.0.linux-amd64.tar.gz
-cd blackbox_exporter-0.25.0.linux-amd64
-```
-
-Start Blackbox Exporter in the background:
-
-```bash
-nohup blackbox_exporter >> /var/log/blackbox_exporter.log 2>&1 &
+sudo systemctl daemon-reload
+sudo systemctl enable prometheus
+sudo systemctl start prometheus
 ```
 
 ---
 
-### **Step 3: Verify Installation**
+## 📊 Step 6: Install Grafana
 
 ```bash
-# Prometheus UI
-curl http://MONITORING_SERVER_PUBLIC_IP:9090
+sudo apt-get update
+sudo apt-get install -y grafana
+```
 
-# Node Exporter metrics
-curl http://WEB_SERVER_PUBLIC_IP:9100/metrics
+Start:
 
-# Blackbox Exporter metrics
-curl http://WEB_SERVER_PUBLIC_IP:9115/metrics
+```bash
+sudo systemctl enable grafana-server
+sudo systemctl start grafana-server
+```
+
+Access:
+
+```
+http://MONITORING_SERVER_PUBLIC_IP:3000
 ```
 
 ---
 
-### All Command Directly
+# 🌐 APPLICATION SERVER (Node Exporter + Blackbox)
 
-#### Web Server (Node Exporter + Blackbox Exporter) Only
+---
+
+## 📦 Step 1: Node Exporter
+
 ```bash
-nohup blackbox_exporter >> /var/log/blackbox_exporter.log 2>&1 & 
-nohup node_exporter >> /var/log/node_exporter.log 2>&1 & 
+cd /opt
+
+wget https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz
+
+tar -xvf node_exporter-1.8.2.linux-amd64.tar.gz
+cd node_exporter-1.8.2.linux-amd64
 ```
+
+---
+
+## ▶️ Run Node Exporter
+
+```bash
+nohup ./node_exporter --web.listen-address="0.0.0.0:9100" > node.log 2>&1 &
+```
+
+---
+
+## 📦 Step 2: Blackbox Exporter
+
+```bash
+cd /opt
+
+wget https://github.com/prometheus/blackbox_exporter/releases/download/v0.27.0/blackbox_exporter-0.27.0.linux-amd64.tar.gz
+
+tar -xvf blackbox_exporter-0.27.0.linux-amd64.tar.gz
+cd blackbox_exporter-0.27.0.linux-amd64
+```
+
+---
+
+## ▶️ Run Blackbox Exporter
+
+```bash
+nohup ./blackbox_exporter --web.listen-address="0.0.0.0:9115" > blackbox.log 2>&1 &
+```
+
+---
+
+# 🔍 Verification Commands
+
+---
+
+## On Application Server
+
+```bash
+ss -tulnp | grep 9100
+ss -tulnp | grep 9115
+```
+
+```bash
+curl http://localhost:9100/metrics
+curl http://localhost:9115/probe?target=google.com&module=http_2xx
+```
+
+---
+
+## On Monitoring Server
+
+```bash
+curl http://3.108.66.47:9100/metrics
+curl http://3.108.66.47:9115/probe?target=google.com&module=http_2xx
+```
+
+---
+
+# 🎯 FINAL RESULT
+
+| Component         | Server Type       | Port | Status |
+| ----------------- | ----------------- | ---- | ------ |
+| Prometheus        | Monitoring Server | 9090 | 🟢 UP  |
+| Grafana           | Monitoring Server | 3000 | 🟢 UP  |
+| Node Exporter     | App Server        | 9100 | 🟢 UP  |
+| Blackbox Exporter | App Server        | 9115 | 🟢 UP  |
+
+---
+
+# ⚠️ IMPORTANT (PRODUCTION NOTE)
+
+After testing:
+
+✔ Replace PUBLIC IP → PRIVATE IP (secure VPC setup)
+✔ Restrict SG to Prometheus SG only
+✔ Replace nohup → systemd services
+
+---
+
+# 🚀 RESULT
+
+You now have:
+
+* Fully working AWS monitoring system
+* Prometheus scraping real metrics
+* Blackbox uptime monitoring
+* Grafana visualization ready
+* Production-ready architecture foundation
 
 ---

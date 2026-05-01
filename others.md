@@ -42,4 +42,3 @@ To make your DevOps repo more complete and industry-ready, consider adding these
 * `nginx.sh` – Reverse proxy / ingress
 
 ---
-
