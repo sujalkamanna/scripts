@@ -9,31 +9,31 @@ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-**1. The above copyright notice and this permission notice shall be included
-   in all copies or substantial portions of the Software.**
+1. The above copyright notice and this permission notice shall be included
+   in all copies or substantial portions of the Software.
 
-**2. The following acknowledgment is hereby made regarding external tools,
-   installation guides, software, and components referenced in this project:**
-   
-   **- This repository may reference third‑party open source projects,
+2. The following acknowledgment is hereby made regarding external tools,
+   installation guides, software, and components referenced in this project:
+
+   * This repository may reference third-party open source projects,
      installation guides, scripts, and documentation hosted by external
-     communities, organizations, or open source projects.**
-   
-   **- Any URLs, installation guides, and documentation linked from this
+     communities, organizations, or open source projects.
+
+   * Any URLs, installation guides, and documentation linked from this
      repository belong to their respective owners and are not claimed to be
-     owned by the copyright holder of this repository.**
+     owned by the copyright holder of this repository.
 
-   **- All trademarks, service marks, and trade names referenced in this
-     repository are the property of their respective owners.**
+   * All trademarks, service marks, and trade names referenced in this
+     repository are the property of their respective owners.
 
-   **- Use of any installation guide URLs, Docker files, Kubernetes scripts,
+   * Use of any installation guide URLs, Docker files, Kubernetes scripts,
      Jenkins pipelines, Terraform guides, or related content is subject to
-     the terms of the respective upstream project’s license and terms of use.**
+     the terms of the respective upstream project's license and terms of use.
 
-**3. By using or distributing this Software, you agree and acknowledge that
-   you are responsible for your own compliance with any third‑party license
+3. By using or distributing this Software, you agree and acknowledge that
+   you are responsible for your own compliance with any third-party license
    terms applicable to the content or software you use, reference, or deploy
-   based on this repository.**
+   based on this repository.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
