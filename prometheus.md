@@ -1,5 +1,3 @@
----
-
 # 📄 Prometheus Monitoring Setup on AWS EC2 (Production Guide)
 
 This guide explains a **working AWS monitoring architecture** using:
@@ -59,8 +57,8 @@ Inbound:
 
 ```
 SSH (22)            → Your IP
-Node Exporter 9100  → 0.0.0.0/0 (testing) OR Prometheus SG
-Blackbox 9115       → 0.0.0.0/0 (testing) OR Prometheus SG
+Node Exporter 9100  → Prometheus SG only (NOT 0.0.0.0/0)
+Blackbox 9115       → Prometheus SG only (NOT 0.0.0.0/0)
 ```
 
 Outbound:
@@ -80,10 +78,10 @@ All traffic allowed
 ```bash
 cd /opt
 
-wget https://github.com/prometheus/prometheus/releases/download/v3.2.1/prometheus-3.2.1.linux-amd64.tar.gz
+wget https://github.com/prometheus/prometheus/releases/download/v2.54.1/prometheus-2.54.1.linux-amd64.tar.gz
 
-tar -xvf prometheus-3.2.1.linux-amd64.tar.gz
-cd prometheus-3.2.1.linux-amd64
+tar -xvf prometheus-2.54.1.linux-amd64.tar.gz
+cd prometheus-2.54.1.linux-amd64
 
 sudo cp prometheus promtool /usr/local/bin/
 ```
@@ -107,7 +105,7 @@ sudo nano /etc/prometheus/prometheus.yml
 
 ---
 
-## ✅ FINAL CONFIG (USE PUBLIC IP ONLY FOR NOW)
+## ✅ FINAL CONFIG (USE PRIVATE IPS IN PRODUCTION)
 
 ```yaml
 global:
@@ -127,7 +125,7 @@ scrape_configs:
   # -----------------------
   - job_name: 'node_exporter'
     static_configs:
-      - targets: ['3.108.66.47:9100']
+      - targets: ['APP_SERVER_PRIVATE_IP:9100']
 
   # -----------------------
   # Blackbox Exporter (APP SERVER)
@@ -139,7 +137,7 @@ scrape_configs:
 
     static_configs:
       - targets:
-        - http://3.108.66.47
+        - http://APP_SERVER_PRIVATE_IP_OR_DOMAIN
 
     relabel_configs:
       - source_labels: [__address__]
@@ -149,7 +147,7 @@ scrape_configs:
         target_label: instance
 
       - target_label: __address__
-        replacement: 3.108.66.47:9115
+        replacement: APP_SERVER_PRIVATE_IP:9115
 ```
 
 ---
@@ -188,14 +186,28 @@ sudo systemctl start prometheus
 
 ---
 
-## 📊 Step 6: Install Grafana
+## 📊 Step 6: Install Grafana (FIXED - proper repo added)
 
 ```bash
+sudo apt-get update
+
+sudo apt-get install -y apt-transport-https software-properties-common wget gnupg
+
+sudo mkdir -p /etc/apt/keyrings
+
+wget -q -O - https://apt.grafana.com/gpg.key | \
+gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
+
+echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | \
+sudo tee /etc/apt/sources.list.d/grafana.list
+
 sudo apt-get update
 sudo apt-get install -y grafana
 ```
 
-Start:
+---
+
+## ▶️ Start Grafana
 
 ```bash
 sudo systemctl enable grafana-server
@@ -277,8 +289,8 @@ curl http://localhost:9115/probe?target=google.com&module=http_2xx
 ## On Monitoring Server
 
 ```bash
-curl http://3.108.66.47:9100/metrics
-curl http://3.108.66.47:9115/probe?target=google.com&module=http_2xx
+curl http://APP_SERVER_PRIVATE_IP:9100/metrics
+curl http://APP_SERVER_PRIVATE_IP:9115/probe?target=google.com&module=http_2xx
 ```
 
 ---
@@ -301,6 +313,7 @@ After testing:
 ✔ Replace PUBLIC IP → PRIVATE IP (secure VPC setup)
 ✔ Restrict SG to Prometheus SG only
 ✔ Replace nohup → systemd services
+✔ Avoid exposing exporters publicly
 
 ---
 
