@@ -2,17 +2,17 @@
 
 This guide installs **Grafana OSS** on a dedicated **Monitoring Server (same server as Prometheus)** and connects it to Prometheus for dashboards like:
 
-- Node Exporter (System Metrics)
-- Blackbox Exporter (Uptime / HTTP monitoring)
+* Node Exporter (System Metrics)
+* Blackbox Exporter (Uptime / HTTP monitoring)
 
 ---
 
 # 🏗️ Architecture
 
-| Server Type | Role |
-|------------|------|
-| **Monitoring Server (EC2-1)** | Prometheus + Grafana |
-| **Application Server (EC2-2)** | Node Exporter + Blackbox Exporter |
+| Server Type                    | Role                                                     |
+| ------------------------------ | -------------------------------------------------------- |
+| **Application Server (EC2-1)** | Application + Node Exporter                              |
+| **Monitoring Server (EC2-2)**  | Prometheus + Grafana + Blackbox Exporter + Node Exporter |
 
 ---
 
@@ -21,21 +21,23 @@ This guide installs **Grafana OSS** on a dedicated **Monitoring Server (same ser
 ## 📌 Monitoring Server SG (Grafana + Prometheus)
 
 Inbound:
-- SSH (22) → Your IP
-- Grafana (3000) → Your IP
-- Prometheus (9090) → Your IP
+
+* SSH (22) → Your IP
+* Grafana (3000) → Your IP
+* Prometheus (9090) → Your IP
 
 Outbound:
-- All traffic allowed
+
+* All traffic allowed
 
 ---
 
 ## 📌 Application Server SG
 
 Inbound:
-- 9100 (Node Exporter) → Monitoring Server Public IP
-- 9115 (Blackbox Exporter) → Monitoring Server Public IP
-- SSH (22) → Your IP
+
+* 9100 (Node Exporter) → Monitoring Server Security Group
+* SSH (22) → Your IP
 
 ---
 
@@ -43,11 +45,11 @@ Inbound:
 
 ---
 
-# 📦 Step 1: Install Grafana (Ubuntu / Debian / Amazon Linux compatible)
+# 📦 Step 1: Install Grafana (Ubuntu / Debian)
 
 ```bash
 sudo apt-get update -y
-sudo apt-get install -y apt-transport-https software-properties-common wget
+sudo apt-get install -y apt-transport-https software-properties-common wget gpg
 
 sudo mkdir -p /etc/apt/keyrings/
 
@@ -57,7 +59,7 @@ echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stab
 
 sudo apt-get update -y
 sudo apt-get install grafana -y
-````
+```
 
 ---
 
@@ -142,28 +144,16 @@ You should see:
 
 ---
 
-# ⚠️ IMPORTANT FIXES (BASED ON YOUR ISSUES)
-
-### ❌ Do NOT use:
-
-* nohup for Grafana
-* manual grafana-server binary execution
-
-### ✅ Correct approach:
-
-* systemd only (stable + production safe)
-
----
-
 # 🎯 Final Result
 
-| Component         | Status                |
-| ----------------- | --------------------- |
-| Grafana           | Running on port 3000  |
-| Prometheus        | Running on port 9090  |
-| Node Exporter     | Running on app server |
-| Blackbox Exporter | Running on app server |
-| Dashboards        | Fully working         |
+| Component         | Status                                    |
+| ----------------- | ----------------------------------------- |
+| Grafana           | Running on Monitoring Server (Port 3000)  |
+| Prometheus        | Running on Monitoring Server (Port 9090)  |
+| Blackbox Exporter | Running on Monitoring Server (Port 9115)  |
+| Node Exporter     | Running on Monitoring Server (Port 9100)  |
+| Node Exporter     | Running on Application Server (Port 9100) |
+| Dashboards        | Fully working                             |
 
 ---
 
@@ -173,7 +163,7 @@ You now have:
 
 ✔ AWS VPC monitoring architecture
 ✔ Prometheus + Grafana integration
-✔ Real-time system metrics
+✔ Real-time system metrics from both servers
 ✔ HTTP uptime monitoring (Blackbox)
 ✔ Production-grade systemd setup
 ✔ Public IP based access (no DNS issues)
