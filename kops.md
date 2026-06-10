@@ -274,9 +274,7 @@ Expected:
 
 ---
 
-## 📌 BEST PRACTICE TIP (Optional)
-
-Add this comment at the top of your install file:
+## 📌 TIP
 
 ```bash
 # IMPORTANT:
