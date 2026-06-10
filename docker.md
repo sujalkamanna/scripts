@@ -1,7 +1,4 @@
-
-# Download and Run Docker Script
-
-## Download the File
+# Docker Installation
 
 ### On Ubuntu, RHEL, or Amazon Linux
 
