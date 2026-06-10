@@ -22,8 +22,8 @@ The scripts handle:
 
 ## **Prerequisites**
 
-* Ubuntu 24.04 on all nodes
-* EC2 instance type (e.g., t2.medium)
+* Ubuntu 24.04/26.04 on all nodes
+* EC2 instance type (e.g., t3.medium or larger)
 * All inbound traffic allowed in Security Group (or proper Kubernetes ports)
 * Root or sudo access on all nodes
 * Swap disabled (handled by scripts)
@@ -197,9 +197,5 @@ wget -qO- http://my-nginx:80
 * Make sure swap is disabled (handled in scripts).
 * Flannel CNI is used (pod network CIDR: `10.244.0.0/16`).
 * Worker nodes cannot resolve service names from host — test from pods or NodePort.
-
----
-
-This README ensures anyone can reproduce your **Master + Worker Kubernetes cluster** on EC2 with minimal manual steps.
 
 ---
