@@ -1,43 +1,55 @@
-Here's your complete, properly formatted `README.md` file:
-
----
-
 # 📊 Kubernetes Monitoring Stack
 
 A complete guide to set up **Prometheus** and **Grafana** monitoring on Kubernetes using Helm.
+
+<div align="center">
 
 ![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white)
 ![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white)
 ![Grafana](https://img.shields.io/badge/grafana-%23F46800.svg?style=for-the-badge&logo=grafana&logoColor=white)
 
+</div>
+
+
 ---
 
 ## 📋 Table of Contents
 
-- [Prerequisites](#-prerequisites)
-- [Installation](#-installation)
-  - [1. Install Helm](#1-install-helm)
-  - [2. Install Metrics Server](#2-install-metrics-server)
-  - [3. Add Helm Repositories](#3-add-helm-repositories)
-  - [4. Create Namespaces](#4-create-namespaces)
-  - [5. Install Prometheus](#5-install-prometheus)
-  - [6. Install Grafana](#6-install-grafana)
-- [Configuration](#%EF%B8%8F-configuration)
-  - [Access Grafana](#access-grafana)
-  - [Add Prometheus Data Source](#add-prometheus-data-source)
-  - [Import Dashboards](#import-dashboards)
-- [Troubleshooting](#-troubleshooting)
-- [Security Best Practices](#-security-best-practices)
-- [Custom Dashboards](#-custom-dashboards)
-- [Useful Commands](#-useful-commands)
-- [Version Information](#-version-information)
-- [Upgrade Guide](#-upgrade-guide)
-- [Quick Reference](#-quick-reference)
-- [Cleanup](#-cleanup)
-- [Contributing](#-contributing)
-- [Support](#-support)
-- [Acknowledgments](#-acknowledgments)
-- [License](#-license)
+- [📊 Kubernetes Monitoring Stack](#-kubernetes-monitoring-stack)
+  - [📋 Table of Contents](#-table-of-contents)
+  - [🔧 Prerequisites](#-prerequisites)
+  - [🚀 Installation](#-installation)
+    - [1. Install Helm](#1-install-helm)
+    - [2. Install Metrics Server](#2-install-metrics-server)
+    - [3. Add Helm Repositories](#3-add-helm-repositories)
+    - [4. Create Namespaces](#4-create-namespaces)
+    - [5. Install Prometheus](#5-install-prometheus)
+    - [6. Install Grafana](#6-install-grafana)
+  - [⚙️ Configuration](#️-configuration)
+    - [Access Grafana](#access-grafana)
+    - [Add Prometheus Data Source](#add-prometheus-data-source)
+    - [Import Dashboards](#import-dashboards)
+  - [🔍 Troubleshooting](#-troubleshooting)
+    - [Seeing "N/A" in Dashboard Panels?](#seeing-na-in-dashboard-panels)
+    - [Common Issues](#common-issues)
+  - [🔐 Security Best Practices](#-security-best-practices)
+    - [Change Default Grafana Password](#change-default-grafana-password)
+  - [📊 Custom Dashboards](#-custom-dashboards)
+    - [Create a Custom Dashboard JSON](#create-a-custom-dashboard-json)
+  - [🔧 Useful Commands](#-useful-commands)
+    - [Quick Status Check](#quick-status-check)
+    - [View Pod Logs](#view-pod-logs)
+    - [Get Grafana Admin Password (if forgotten)](#get-grafana-admin-password-if-forgotten)
+  - [📦 Version Information](#-version-information)
+  - [🔄 Upgrade Guide](#-upgrade-guide)
+    - [Upgrade Prometheus](#upgrade-prometheus)
+    - [Upgrade Grafana](#upgrade-grafana)
+  - [📚 Quick Reference](#-quick-reference)
+  - [🧹 Cleanup](#-cleanup)
+  - [🤝 Contributing](#-contributing)
+  - [📞 Support](#-support)
+  - [🙏 Acknowledgments](#-acknowledgments)
+  - [📄 License](#-license)
 
 ---
 
