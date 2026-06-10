@@ -8,51 +8,53 @@ echo "🚀 Starting Grafana Installation..."
 # Install dependencies
 # -----------------------------
 echo "📦 Installing dependencies..."
-apt-get update -y
-apt-get install -y apt-transport-https software-properties-common wget gnupg
+sudo apt-get update -y
+sudo apt-get install -y apt-transport-https software-properties-common wget gnupg
 
 # -----------------------------
 # Add Grafana GPG key
 # -----------------------------
 echo "🔐 Adding Grafana GPG key..."
-mkdir -p /etc/apt/keyrings
+sudo mkdir -p /etc/apt/keyrings
 
-wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor -o /etc/apt/keyrings/grafana.gpg
+wget -q -O - https://apt.grafana.com/gpg.key | \
+sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/grafana.gpg
 
 # -----------------------------
 # Add Grafana repository
 # -----------------------------
 echo "📁 Adding Grafana repository..."
-echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" \
-    | tee /etc/apt/sources.list.d/grafana.list
+echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | \
+sudo tee /etc/apt/sources.list.d/grafana.list
 
 # -----------------------------
 # Install Grafana
 # -----------------------------
 echo "📦 Installing Grafana..."
-apt-get update -y
-apt-get install -y grafana
+sudo apt-get update -y
+sudo apt-get install -y grafana
 
 # -----------------------------
-# Start Grafana service
+# Enable + start Grafana
 # -----------------------------
 echo "🚀 Starting Grafana service..."
-systemctl daemon-reload
-systemctl enable grafana-server
-systemctl start grafana-server
+sudo systemctl daemon-reload
+sudo systemctl enable grafana-server
+sudo systemctl start grafana-server
 
 # -----------------------------
-# Verify service
+# Wait for Grafana to start
 # -----------------------------
-echo "🔍 Checking Grafana status..."
-systemctl status grafana-server --no-pager
+sleep 5
 
 # -----------------------------
-# Add Prometheus datasource automatically
+# Configure Prometheus datasource
 # -----------------------------
 echo "⚙️ Configuring Prometheus datasource..."
 
-cat <<EOF > /etc/grafana/provisioning/datasources/prometheus.yaml
+sudo mkdir -p /etc/grafana/provisioning/datasources
+
+cat <<EOF | sudo tee /etc/grafana/provisioning/datasources/prometheus.yaml
 apiVersion: 1
 
 datasources:
@@ -63,7 +65,16 @@ datasources:
     isDefault: true
 EOF
 
-systemctl restart grafana-server
+# -----------------------------
+# Restart Grafana to apply config
+# -----------------------------
+sudo systemctl restart grafana-server
+
+# -----------------------------
+# Verify
+# -----------------------------
+echo "🔍 Checking Grafana status..."
+sudo systemctl status grafana-server --no-pager
 
 # -----------------------------
 # Final Output
@@ -77,4 +88,4 @@ echo "🔑 Default Login:"
 echo "Username: admin"
 echo "Password: admin"
 echo ""
-echo "📊 Prometheus datasource already configured!"
+echo "📊 Prometheus datasource auto-configured!"
