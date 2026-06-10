@@ -1,6 +1,4 @@
-### ✅ Other useful **install / setup scripts** you can add to your repo
-
-To make your DevOps repo more complete and industry-ready, consider adding these:
+### ✅ Other useful **install / setup scripts**
 
 #### 🔐 Security & Access
 
