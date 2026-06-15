@@ -1,23 +1,40 @@
 #!/bin/bash
 set -e
 
-echo "=== 🚀 Running MASTER setup ==="
+echo "=== Kubernetes Control Plane Setup ==="
 
-# 1. Initialize Kubernetes master
 sudo kubeadm init \
 --pod-network-cidr=10.244.0.0/16 \
 --cri-socket=unix:///run/containerd/containerd.sock
 
-# 2. Configure kubectl for current user
 mkdir -p $HOME/.kube
-sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-# 3. Deploy Flannel CNI
-kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+sudo cp -i /etc/kubernetes/admin.conf \
+$HOME/.kube/config
 
-echo "=== ✔ MASTER setup complete ==="
+sudo chown $(id -u):$(id -g) \
+$HOME/.kube/config
 
-# 4. Print join command for workers
-echo "=== 🔑 Save this command to join worker nodes ==="
+echo
+echo "Deploying Flannel..."
+
+kubectl apply -f \
+https://raw.githubusercontent.com/flannel-io/flannel/v0.27.0/Documentation/kube-flannel.yml
+
+echo
+echo "Waiting 30 seconds..."
+sleep 30
+
+echo
+kubectl get nodes -o wide
+
+echo
+kubectl get pods -A
+
+echo
+echo "=== Control Plane Ready ==="
+
+echo
+echo "===== WORKER JOIN COMMAND ====="
 kubeadm token create --print-join-command
+echo "================================"
