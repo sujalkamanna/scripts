@@ -1,42 +1,78 @@
-# **Kubernetes Cluster Setup on Ubuntu 24.04 (Master + Worker Nodes)**
+# Kubernetes Cluster Setup on Ubuntu 24.04 / 26.04 (Master + Worker Nodes)
 
 ## Overview
 
-This guide provides **automated scripts** to set up a Kubernetes cluster with **containerd** as the container runtime. The cluster includes:
+This repository provides automated scripts to deploy a Kubernetes cluster using **kubeadm**, **containerd**, and **Flannel CNI**.
 
-* **1 Master Node**
-* **1 or more Worker Nodes**
+The cluster consists of:
 
-All nodes are assumed to be **Ubuntu 24.04 EC2 instances**, with necessary ports open in security groups.
+* 1 Control Plane (Master) Node
+* 1 or more Worker Nodes
 
-The scripts handle:
+The scripts automate:
 
-* System updates and kernel configuration
+* System updates
 * Swap disabling
+* Kernel and networking configuration
 * Containerd installation and configuration
-* Kubernetes (kubeadm, kubelet, kubectl) installation
-* Master initialization and Flannel CNI deployment
-* Worker node joining
+* Kubernetes component installation (kubeadm, kubelet, kubectl)
+* Control Plane initialization
+* Flannel CNI deployment
+* Worker node cluster joining
 
 ---
 
-## **Prerequisites**
+## Kubernetes Version
 
-* Ubuntu 24.04/26.04 on all nodes
-* EC2 instance type (e.g., t3.medium or larger)
-* All inbound traffic allowed in Security Group (or proper Kubernetes ports)
-* Root or sudo access on all nodes
-* Swap disabled (handled by scripts)
+| Component         | Version                     |
+| ----------------- | --------------------------- |
+| Kubernetes        | 1.33.x                      |
+| Container Runtime | containerd                  |
+| CNI               | Flannel                     |
+| OS                | Ubuntu 24.04 / Ubuntu 26.04 |
 
 ---
 
-## **Files**
+## Prerequisites
 
-| File               | Description                                                                       |
-| ------------------ | --------------------------------------------------------------------------------- |
-| `k8-common-script` | Installs prerequisites, containerd, and Kubernetes components on all nodes        |
-| `k8-master-script` | Initializes the master node, deploys Flannel CNI, prints join command for workers |
-| `k8-slave-script`  | Joins worker node to the cluster using join command from master                   |
+* Ubuntu 24.04 LTS or Ubuntu 26.04 LTS
+* Minimum 2 vCPU and 4 GB RAM per node
+* Root or sudo access
+* Internet connectivity
+* Security Group or firewall rules allowing Kubernetes traffic
+
+### Required Ports
+
+#### Control Plane
+
+| Port      | Purpose               |
+| --------- | --------------------- |
+| 6443      | Kubernetes API Server |
+| 2379-2380 | etcd                  |
+| 10250     | Kubelet               |
+| 10257     | Controller Manager    |
+| 10259     | Scheduler             |
+
+#### Worker Nodes
+
+| Port        | Purpose           |
+| ----------- | ----------------- |
+| 10250       | Kubelet           |
+| 30000-32767 | NodePort Services |
+
+---
+
+## Repository Files
+
+| File                | Description                                   |
+| ------------------- | --------------------------------------------- |
+| k8-common-script.sh | Common setup for all nodes                    |
+| k8-master-script.sh | Initializes control plane and deploys Flannel |
+| k8-slave-script.sh  | Joins worker node to cluster                  |
+
+---
+
+## Download Scripts
 
 ```bash
 curl -LO https://raw.githubusercontent.com/sujalkamanna/scripts/refs/heads/main/k8-common-script.sh
@@ -48,154 +84,234 @@ curl -LO https://raw.githubusercontent.com/sujalkamanna/scripts/refs/heads/main/
 curl -LO https://raw.githubusercontent.com/sujalkamanna/scripts/refs/heads/main/k8-slave-script.sh
 ```
 
+Make them executable:
+
+```bash
+chmod +x *.sh
+```
+
 ---
 
-## **Setup Instructions**
+# Master Node Setup
 
-### **1. Master Node**
-
-1. Set hostname:
+### Set Hostname
 
 ```bash
 sudo hostnamectl set-hostname master
 ```
 
-2. Make scripts executable:
+Reconnect to the server or open a new shell:
 
 ```bash
-chmod +x k8-common-script k8-master-script
+exec bash
 ```
 
-3. Run common setup:
+### Run Common Setup
 
 ```bash
-./k8-common-script
+./k8-common-script.sh
 ```
 
-4. Run master setup:
+### Initialize Control Plane
 
 ```bash
-./k8-master-script
+./k8-master-script.sh
 ```
 
-5. **Copy the join command** displayed at the end — needed for worker nodes.
+The script will:
+
+* Initialize Kubernetes
+* Configure kubectl
+* Deploy Flannel CNI
+* Display the worker join command
+
+Save the generated join command.
+
+Example:
+
+```bash
+kubeadm join 10.0.0.10:6443 \
+--token abcdef.1234567890123456 \
+--discovery-token-ca-cert-hash sha256:xxxxxxxxxxxxxxxx
+```
 
 ---
 
-### **2. Worker Node(s)**
+# Worker Node Setup
 
-1. Set hostname:
-
-```bash
-sudo hostnamectl set-hostname slave
-```
-
-2. Make scripts executable:
+### Set Hostname
 
 ```bash
-chmod +x k8-common-script k8-slave-script
+sudo hostnamectl set-hostname worker-1
 ```
 
-3. Run common setup:
+Reconnect to the server or open a new shell:
 
 ```bash
-./k8-common-script
+exec bash
 ```
 
-4. Run worker setup:
+### Run Common Setup
 
 ```bash
-./k8-slave-script
+./k8-common-script.sh
 ```
 
-* If using the **interactive version**, paste the join command from the master when prompted.
-* If using the **hardcoded version**, update `<MASTER-IP>`, `<TOKEN>`, and `<HASH>` in `k8-slave-script` before running.
+### Join Cluster
+
+```bash
+./k8-slave-script.sh
+```
+
+Paste the join command generated on the master node when prompted.
+
+Example:
+
+```bash
+kubeadm join 10.0.0.10:6443 \
+--token abcdef.1234567890123456 \
+--discovery-token-ca-cert-hash sha256:xxxxxxxxxxxxxxxx
+```
 
 ---
 
-## **Verification**
+# Verification
 
-On the master node:
-
-1. Check node status:
+Run on the master node:
 
 ```bash
 kubectl get nodes
 ```
 
-Expected output:
+Expected:
 
-```
-NAME     STATUS   ROLES           AGE   VERSION
-master   Ready    control-plane   Xm    v1.30.x
-slave    Ready    <none>          Xm    v1.30.x
+```text
+NAME       STATUS   ROLES           AGE   VERSION
+master     Ready    control-plane   5m    v1.33.x
+worker-1   Ready    <none>          2m    v1.33.x
 ```
 
-2. Check system pods:
+---
+
+## Verify System Pods
 
 ```bash
 kubectl get pods -A
 ```
 
-Expected pods:
+Expected:
 
-```
-kube-system
-NAME                       READY   STATUS    RESTARTS   AGE
-coredns-xxxxx               1/1     Running   0          Xm
-kube-flannel-ds-xxxxx       1/1     Running   0          Xm
-kube-proxy-xxxxx            1/1     Running   0          Xm
+```text
+NAMESPACE     NAME                               STATUS
+kube-system   coredns-xxxxx                      Running
+kube-system   kube-flannel-ds-xxxxx              Running
+kube-system   kube-proxy-xxxxx                   Running
 ```
 
 ---
 
-## **Deploy a Test Pod**
+# Deploy a Test Application
 
-1. Deploy nginx:
+Create an NGINX pod:
 
 ```bash
-kubectl run my-nginx --image=nginx:slim
+kubectl run nginx \
+--image=nginx:stable \
+--restart=Never
 ```
 
-2. Expose it (NodePort):
+Expose it using NodePort:
 
 ```bash
-kubectl expose pod my-nginx --type=NodePort --port=80
+kubectl expose pod nginx \
+--type=NodePort \
+--port=80
+```
+
+View the service:
+
+```bash
 kubectl get svc
 ```
 
-3. Access from browser:
+Example:
 
+```text
+NAME    TYPE       CLUSTER-IP      PORT(S)
+nginx   NodePort   10.96.120.20    80:31234/TCP
 ```
-http://<worker-node-ip>:<NodePort>
+
+Access:
+
+```text
+http://<worker-public-ip>:31234
 ```
 
 ---
 
-## **Optional**
+# Useful Commands
 
-* Enable `kubectl` alias:
+Check cluster status:
 
 ```bash
-echo "alias kc=kubectl" >> ~/.bashrc
+kubectl get nodes -o wide
+```
+
+View all pods:
+
+```bash
+kubectl get pods -A
+```
+
+View services:
+
+```bash
+kubectl get svc -A
+```
+
+View cluster information:
+
+```bash
+kubectl cluster-info
+```
+
+---
+
+# Optional Kubectl Alias
+
+```bash
+echo 'alias kc=kubectl' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-* Verify DNS from worker pods:
+Usage:
 
 ```bash
-kubectl run -it --rm busybox --image=busybox --restart=Never -- sh
-# Inside pod:
-wget -qO- http://my-nginx:80
+kc get nodes
 ```
 
 ---
 
-## **Notes**
+# Cleanup Cluster
 
-* Scripts assume Ubuntu 24.04 and containerd.
-* Make sure swap is disabled (handled in scripts).
-* Flannel CNI is used (pod network CIDR: `10.244.0.0/16`).
-* Worker nodes cannot resolve service names from host — test from pods or NodePort.
+Reset a node:
+
+```bash
+sudo kubeadm reset -f
+```
+
+Remove Kubernetes configuration:
+
+```bash
+rm -rf ~/.kube
+```
 
 ---
+
+# Notes
+
+* Uses containerd as the container runtime.
+* Uses Flannel CNI with pod CIDR 10.244.0.0/16.
+* Supports Ubuntu 24.04 LTS and Ubuntu 26.04 LTS.
+* Tested with Kubernetes 1.33.x.
+* Scripts are intended for learning, homelabs, cloud labs, and DevOps/SRE practice environments.
