@@ -39,13 +39,13 @@ The scripts handle:
 | `k8-slave-script`  | Joins worker node to the cluster using join command from master                   |
 
 ```bash
-curl -O https://github.com/sujalkamanna/scripts/blob/main/k8-common-script.sh
+curl -LO https://raw.githubusercontent.com/sujalkamanna/scripts/refs/heads/main/k8-common-script.sh
 ```
 ```bash
-curl -O https://github.com/sujalkamanna/scripts/blob/main/k8-master-script.sh
+curl -LO https://raw.githubusercontent.com/sujalkamanna/scripts/refs/heads/main/k8-master-script.sh
 ```
 ```bash
-curl -O https://github.com/sujalkamanna/scripts/blob/main/k8-slave-script.sh
+curl -LO https://raw.githubusercontent.com/sujalkamanna/scripts/refs/heads/main/k8-slave-script.sh
 ```
 
 ---
