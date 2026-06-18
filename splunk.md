@@ -357,3 +357,102 @@ For large environments:
 Splunk is a powerful log monitoring and analysis tool that enables real-time visibility into applications and systems. By understanding its architecture, installation, and usage, you can efficiently monitor infrastructure, troubleshoot issues, and improve system reliability.
 
 **Mastering Splunk provides a strong foundation for working with any modern monitoring or observability tool.**
+
+# Additional Resources
+
+| Resource                                | URL                                                                 |
+| --------------------------------------- | ------------------------------------------------------------------- |
+| Splunk Documentation                    | https://docs.splunk.com                                             |
+| Splunk Enterprise Docs                  | https://docs.splunk.com/Documentation/Splunk                        |
+| Splunk Cloud Platform Docs              | https://docs.splunk.com/Documentation/SplunkCloud                   |
+| Splunk Universal Forwarder Docs         | https://docs.splunk.com/Documentation/Forwarder                     |
+| Splunk Search Processing Language (SPL) | https://docs.splunk.com/Documentation/Splunk/latest/SearchReference |
+| Splunk Dashboard Studio                 | https://docs.splunk.com/Documentation/Splunk/latest/DashStudio      |
+| Splunk Enterprise Security              | https://docs.splunk.com/Documentation/ES                            |
+| Splunk Observability Cloud              | https://docs.splunk.com/observability                               |
+| Splunk Education & Training             | https://education.splunk.com                                        |
+| Splunk Community                        | https://community.splunk.com                                        |
+
+---
+
+# 📎 Official Documentation
+
+* [Splunk Documentation](https://docs.splunk.com/)
+* [Splunk Enterprise Documentation](https://docs.splunk.com/Documentation/Splunk)
+* [Splunk Cloud Platform Documentation](https://docs.splunk.com/Documentation/SplunkCloud)
+* [Universal Forwarder Documentation](https://docs.splunk.com/Documentation/Forwarder)
+* [Search Processing Language (SPL) Documentation](https://docs.splunk.com/Documentation/Splunk/latest/SearchReference)
+* [Dashboard Studio Documentation](https://docs.splunk.com/Documentation/Splunk/latest/DashStudio)
+* [Splunk Enterprise Security Documentation](https://docs.splunk.com/Documentation/ES)
+* [Splunk Observability Cloud Documentation](https://docs.splunk.com/observability)
+* [Splunk Education Portal](https://education.splunk.com/)
+* [Splunk Community](https://community.splunk.com/)
+
+---
+
+# 📎 Disclaimer & Attribution
+
+This document is an unofficial educational guide created for learning, revision, interview preparation, monitoring implementation, log analysis, DevOps engineering, platform engineering, cloud engineering, site reliability engineering (SRE), security operations (SOC), infrastructure monitoring, application monitoring, and observability practices.
+
+Primary references include:
+
+* Splunk Documentation
+* Splunk Enterprise Documentation
+* Splunk Cloud Documentation
+* Splunk Universal Forwarder Documentation
+* Splunk Search Processing Language (SPL) Documentation
+* Splunk Observability Documentation
+* Splunk Enterprise Security Documentation
+
+Splunk is a data analytics, log management, security, and observability platform used for collecting, indexing, searching, monitoring, and visualizing machine-generated data from applications, infrastructure, cloud platforms, and security systems.
+
+All trademarks, product names, and service names belong to their respective owners.
+
+For authoritative information, always refer to the official Splunk documentation.
+
+---
+
+# 🎉 Conclusion
+
+```text id="splunk-guide"
+Logs
++
+Events
++
+Indexes
++
+Forwarders
++
+Search Processing Language (SPL)
++
+Dashboards
++
+Alerts
++
+Security Monitoring
++
+Infrastructure Monitoring
++
+Application Monitoring
++
+Observability
++
+Troubleshooting
+```
+
+Splunk provides a powerful platform for centralized log management, monitoring, analytics, security operations, and observability across modern IT environments.
+
+By leveraging Universal Forwarders, indexing, SPL queries, dashboards, alerts, and integrations, teams can gain real-time visibility into applications, servers, cloud infrastructure, and security events.
+
+Whether deployed as Splunk Enterprise or Splunk Cloud, Splunk helps organizations improve operational efficiency, accelerate troubleshooting, strengthen security monitoring, and maintain system reliability at scale.
+
+---
+
+```md id="splunk-meta"
+**Last Updated:** 2026
+**Platform:** Splunk
+**Version:** Splunk Enterprise 10.x+ / Splunk Cloud Platform
+**License:** Commercial Software (Free Trial & Limited Free Version Available)
+
+For the latest information, visit https://docs.splunk.com/
+```
