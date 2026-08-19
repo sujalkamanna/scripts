@@ -1,370 +1,172 @@
-```bash
 #!/bin/bash
 
-set -euo pipefail
+set -e
 
-#==========================================================
-# Jenkins LTS Installation Script
-# Official Jenkins Repository - 2026
-#
-# Supported:
-#   Ubuntu / Debian-based systems
-#
-# Java:
-#   OpenJDK 21 Full JDK
-#
-# Jenkins:
-#   Long Term Support (LTS)
-#==========================================================
+# ==========================================================
+# Jenkins LTS + OpenJDK 21
+# Ubuntu 24.04 / Ubuntu 26.04
+# ==========================================================
 
 JENKINS_PORT=8080
-JENKINS_REPO="https://pkg.jenkins.io/debian-stable"
-JENKINS_KEY_URL="${JENKINS_REPO}/jenkins.io-2026.key"
-JENKINS_KEYRING="/usr/share/keyrings/jenkins-keyring.asc"
-JENKINS_REPO_FILE="/etc/apt/sources.list.d/jenkins.list"
-JENKINS_PASSWORD_FILE="/var/lib/jenkins/secrets/initialAdminPassword"
+JENKINS_PASSWORD="/var/lib/jenkins/secrets/initialAdminPassword"
 
-echo "=================================================="
-echo "        Jenkins LTS Installation"
-echo "=================================================="
+echo "=========================================="
+echo " Jenkins LTS Installation"
+echo " Ubuntu 24.04 / 26.04"
+echo " OpenJDK 21 Full JDK"
+echo "=========================================="
 
-#==========================================================
-# STEP 0: Verify Operating System
-#==========================================================
-
-echo ""
-echo "🔍 Checking operating system..."
-
-if [ ! -f /etc/os-release ]; then
-    echo "❌ Cannot determine operating system."
+# Must run as root
+if [ "$EUID" -ne 0 ]; then
+    echo "ERROR: Run this script as root."
     exit 1
 fi
 
-source /etc/os-release
-
-case "${ID}" in
-    ubuntu|debian)
-        echo "✅ Detected: ${PRETTY_NAME}"
-        ;;
-    *)
-        echo "❌ Unsupported operating system: ${PRETTY_NAME}"
-        echo "This script supports Ubuntu and Debian."
-        exit 1
-        ;;
-esac
-
-#==========================================================
-# STEP 1: Update System
-#==========================================================
+# ----------------------------------------------------------
+# STEP 1: Update package index
+# ----------------------------------------------------------
 
 echo ""
-echo "🔄 Updating package index..."
+echo "Updating APT..."
 
-sudo apt update
+apt update
 
-#==========================================================
-# STEP 2: Install Full OpenJDK 21
-#==========================================================
-
-echo ""
-echo "☕ Installing OpenJDK 21 Full JDK..."
-
-sudo apt install -y fontconfig openjdk-21-jdk
+# ----------------------------------------------------------
+# STEP 2: Install OpenJDK 21 Full JDK
+# ----------------------------------------------------------
 
 echo ""
-echo "✅ Java Version:"
+echo "Installing OpenJDK 21 Full JDK..."
+
+apt install -y \
+    fontconfig \
+    openjdk-21-jdk \
+    wget \
+    ca-certificates
+
+echo ""
+echo "Java version:"
 java -version
 
 echo ""
-echo "✅ Java Compiler:"
+echo "Javac version:"
 javac -version
 
-#==========================================================
-# STEP 3: Check Jenkins Port
-#==========================================================
+# ----------------------------------------------------------
+# STEP 3: Jenkins repository
+# ----------------------------------------------------------
 
 echo ""
-echo "🔍 Checking Jenkins port ${JENKINS_PORT}..."
+echo "Adding Jenkins LTS repository..."
 
-if command -v ss >/dev/null 2>&1; then
+mkdir -p /etc/apt/keyrings
 
-    if sudo ss -ltnp | grep -q ":${JENKINS_PORT} "; then
+wget -q -O /etc/apt/keyrings/jenkins-keyring.asc \
+    https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
 
-        echo "⚠️ Port ${JENKINS_PORT} is already in use."
-        echo ""
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" \
+    > /etc/apt/sources.list.d/jenkins.list
 
-        sudo ss -ltnp | grep ":${JENKINS_PORT} " || true
-
-        echo ""
-        echo "❌ Jenkins cannot use port ${JENKINS_PORT}."
-        echo "Stop the process using this port or configure Jenkins"
-        echo "to use a different port before continuing."
-
-        exit 1
-
-    else
-
-        echo "✅ Port ${JENKINS_PORT} is available."
-
-    fi
-
-fi
-
-#==========================================================
-# STEP 4: Configure Jenkins LTS Repository
-#==========================================================
+# ----------------------------------------------------------
+# STEP 4: Install Jenkins
+# ----------------------------------------------------------
 
 echo ""
-echo "📦 Configuring Jenkins LTS repository..."
+echo "Updating APT with Jenkins repository..."
 
-sudo mkdir -p /usr/share/keyrings
-
-echo "🔑 Installing Jenkins repository signing key..."
-
-sudo wget -q -O "${JENKINS_KEYRING}" \
-    "${JENKINS_KEY_URL}"
-
-sudo chmod 644 "${JENKINS_KEYRING}"
-
-echo "📋 Adding Jenkins LTS repository..."
-
-echo "deb [signed-by=${JENKINS_KEYRING}] ${JENKINS_REPO} binary/" | \
-    sudo tee "${JENKINS_REPO_FILE}" > /dev/null
-
-#==========================================================
-# STEP 5: Update Repository Information
-#==========================================================
+apt update
 
 echo ""
-echo "🔄 Updating package index with Jenkins repository..."
+echo "Installing Jenkins LTS..."
 
-sudo apt update
+apt install -y jenkins
 
-#==========================================================
-# STEP 6: Install Jenkins
-#==========================================================
-
-echo ""
-echo "📥 Installing Jenkins LTS..."
-
-sudo apt install -y jenkins
-
-#==========================================================
-# STEP 7: Enable & Start Jenkins
-#==========================================================
+# ----------------------------------------------------------
+# STEP 5: Start Jenkins
+# ----------------------------------------------------------
 
 echo ""
-echo "🚀 Enabling and starting Jenkins..."
+echo "Starting Jenkins..."
 
-sudo systemctl daemon-reload
-sudo systemctl enable --now jenkins
+systemctl enable jenkins
+systemctl start jenkins
 
-#==========================================================
-# STEP 8: Verify Jenkins Service
-#==========================================================
+# ----------------------------------------------------------
+# STEP 6: Check Jenkins
+# ----------------------------------------------------------
 
 echo ""
-echo "🔍 Checking Jenkins service..."
+echo "Checking Jenkins status..."
 
 sleep 5
 
 if systemctl is-active --quiet jenkins; then
-
-    echo "✅ Jenkins service is running."
-
+    echo "Jenkins is RUNNING."
 else
-
-    echo "❌ Jenkins failed to start."
-    echo ""
-
-    echo "=================================================="
-    echo "        Jenkins Error Logs"
-    echo "=================================================="
-
-    sudo journalctl -u jenkins -n 50 --no-pager
-
-    echo ""
-    echo "=================================================="
-    echo "        Jenkins Service Status"
-    echo "=================================================="
-
-    sudo systemctl --no-pager --full status jenkins || true
-
+    echo "ERROR: Jenkins failed to start."
+    systemctl status jenkins --no-pager
     exit 1
-
 fi
 
-#==========================================================
-# STEP 9: Configure Firewall (Optional)
-#==========================================================
+# ----------------------------------------------------------
+# STEP 7: Show Jenkins information
+# ----------------------------------------------------------
 
 echo ""
-echo "🛡 Checking firewall configuration..."
-
-if command -v ufw >/dev/null 2>&1; then
-
-    if sudo ufw status | grep -q "Status: active"; then
-
-        echo "🔓 Opening TCP port ${JENKINS_PORT}..."
-
-        sudo ufw allow "${JENKINS_PORT}/tcp"
-
-        echo "✅ Firewall rule configured."
-
-    else
-
-        echo "ℹ️ UFW is installed but inactive."
-        echo "No firewall rule was added."
-
-    fi
-
-else
-
-    echo "ℹ️ UFW is not installed."
-    echo "Skipping firewall configuration."
-
-fi
-
-#==========================================================
-# STEP 10: Jenkins Version
-#==========================================================
+echo "=========================================="
+echo " Jenkins Installation Complete"
+echo "=========================================="
 
 echo ""
-echo "=================================================="
-echo "        Jenkins Version"
-echo "=================================================="
-
-if command -v jenkins >/dev/null 2>&1; then
-
-    jenkins --version
-
-else
-
-    dpkg-query -W -f='${Package} ${Version}\n' jenkins 2>/dev/null || true
-
-fi
-
-#==========================================================
-# STEP 11: Determine Server IP
-#==========================================================
-
-SERVER_IP=""
-
-if command -v hostname >/dev/null 2>&1; then
-
-    SERVER_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
-
-fi
-
-#==========================================================
-# STEP 12: Wait for Initial Admin Password
-#==========================================================
+echo "Jenkins status:"
+systemctl is-active jenkins
 
 echo ""
-echo "🔑 Checking for Jenkins initial admin password..."
-
-PASSWORD_FOUND=false
-
-for i in {1..12}; do
-
-    if [ -f "${JENKINS_PASSWORD_FILE}" ]; then
-
-        PASSWORD_FOUND=true
-        break
-
-    fi
-
-    sleep 2
-
-done
-
-#==========================================================
-# STEP 13: Installation Summary
-#==========================================================
+echo "Jenkins version:"
+dpkg-query -W -f='${Version}\n' jenkins
 
 echo ""
-echo "=================================================="
-echo "     Jenkins LTS Installation Completed"
-echo "=================================================="
-
-echo ""
-echo "🌐 Access Jenkins"
-
-echo "Local : http://localhost:${JENKINS_PORT}"
-
-if [ -n "${SERVER_IP}" ]; then
-    echo "Remote: http://${SERVER_IP}:${JENKINS_PORT}"
-fi
-
-echo ""
-
-if [ "${PASSWORD_FOUND}" = true ]; then
-
-    echo "🔑 Initial Admin Password:"
-    echo ""
-    sudo cat "${JENKINS_PASSWORD_FILE}"
-    echo ""
-
-else
-
-    echo "⚠️ Initial admin password is not available yet."
-    echo ""
-    echo "Run:"
-    echo "sudo cat ${JENKINS_PASSWORD_FILE}"
-
-fi
-
-#==========================================================
-# STEP 14: Java Environment
-#==========================================================
-
-echo ""
-echo "=================================================="
-echo "        Java Environment"
-echo "=================================================="
-
-echo "JAVA:"
+echo "Java version:"
 java -version
 
 echo ""
-echo "JAVAC:"
+echo "Javac version:"
 javac -version
 
 echo ""
-echo "JAVA_HOME:"
-if command -v readlink >/dev/null 2>&1; then
-    JAVA_BIN=$(readlink -f "$(command -v java)")
-    JAVA_HOME_PATH=$(dirname "$(dirname "${JAVA_BIN}")")
-    echo "${JAVA_HOME_PATH}"
+echo "Jenkins URL:"
+echo "http://YOUR_SERVER_IP:${JENKINS_PORT}"
+
+# ----------------------------------------------------------
+# STEP 8: Initial Jenkins password
+# ----------------------------------------------------------
+
+echo ""
+echo "=========================================="
+echo " Jenkins Initial Admin Password"
+echo "=========================================="
+
+if [ -f "$JENKINS_PASSWORD" ]; then
+
+    echo ""
+    cat "$JENKINS_PASSWORD"
+    echo ""
+
+else
+
+    echo ""
+    echo "Password file not available yet."
+    echo ""
+    echo "Run:"
+    echo "cat $JENKINS_PASSWORD"
+
 fi
 
-#==========================================================
-# STEP 15: Final Service Status
-#==========================================================
+echo ""
+echo "=========================================="
+echo " Installation Finished"
+echo "=========================================="
 
 echo ""
-echo "=================================================="
-echo "        Jenkins Service Status"
-echo "=================================================="
-
-sudo systemctl --no-pager --full status jenkins
-
-echo ""
-echo "=================================================="
-echo "        Installation Complete"
-echo "=================================================="
-
-echo ""
-echo "🎉 Jenkins LTS installation completed successfully!"
-
-echo ""
-echo "Next step:"
-echo "Open Jenkins in your browser and complete the"
-echo "initial setup wizard."
-
-echo ""
-echo "For Jenkins logs:"
-echo "sudo journalctl -u jenkins -f"
-
-echo ""
-```
+echo "Jenkins logs:"
+echo "journalctl -u jenkins -f"
