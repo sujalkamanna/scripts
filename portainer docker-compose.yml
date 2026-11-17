@@ -1,0 +1,32 @@
+
+services:
+
+  # Container 1: Nginx
+  nginx:
+    image: nginx:latest
+    container_name: nginx-web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+
+  # Container 2: Apache2
+  apache2:
+    image: ubuntu:24.04
+    container_name: apache2-web
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    command: >
+      bash -c "apt-get update &&
+      DEBIAN_FRONTEND=noninteractive apt-get install -y apache2 &&
+      echo '<h1>Apache2 Server Running Successfully</h1>' > /var/www/html/index.html &&
+      apachectl -D FOREGROUND"
+
+  # Container 3: Independent Ubuntu
+  ubuntu:
+    image: ubuntu:24.04
+    container_name: ubuntu-server
+    restart: unless-stopped
+    command: sleep infinity
+    tty: true
+    stdin_open: true
