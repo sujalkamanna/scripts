@@ -1,51 +1,131 @@
+
 # Docker Installation
 
 ### On Ubuntu, RHEL, or Amazon Linux
 
-You can download the script using **curl**:
+You can install Docker using the following methods.
 
-or use
+**Method 1: Install using APT (Ubuntu/Debian)**
 
-```sudo apt-get install docker.io```
+bash
+
+```bash
+sudo apt update
+sudo apt-get install -y docker.io
+```
+
+> Note: `docker.io` is the distribution-maintained Docker package. It may not be the latest official Docker Engine release.
+
+**Method 2: Download the custom Docker installation script**
+
+Using **curl**:
+
+bash
 
 ```bash
 curl -O https://raw.githubusercontent.com/sujalkamanna/scripts/main/docker.sh
-````
+```
 
 Or using **wget**:
+
+bash
 
 ```bash
 wget https://raw.githubusercontent.com/sujalkamanna/scripts/main/docker.sh
 ```
 
-> Note: `curl` and `wget` are Linux commands and will work in Ubuntu, RHEL, Amazon Linux, or other Linux distributions.
+**Method 3: Install using the official Docker convenience script**
+
+bash
+
+```bash
+curl -fsSL https://get.docker.com -o get-docker.sh
+```
+
+Preview installation:
+
+bash
+
+```bash
+sudo sh ./get-docker.sh --dry-run
+```
+
+Install Docker:
+
+bash
+
+```bash
+sudo sh ./get-docker.sh
+```
+
+> Note: The convenience script detects your Linux distribution and configures the package manager to install Docker Engine, containerd, and runc. It is recommended for development and testing, not production environments.
 
 ---
 
 ### On Windows
 
-You can download the script using **winget**:
+Docker installation scripts are Linux shell scripts and cannot be executed directly in Windows PowerShell.
 
-```powershell
-winget install https://raw.githubusercontent.com/sujalkamanna/scripts/main/docker.sh
-```
+You can use:
 
-> Note: The script is a Linux shell script, so on Windows you must run it in **WSL, Git Bash, or another Bash-compatible environment**.
+- **WSL2:** Run the installation script inside an Ubuntu or other supported Linux distribution.
+- **Git Bash:** Use only if the environment supports the required Linux commands and package manager. WSL2 is recommended.
 
 ---
 
 ## Run the Script
 
-After downloading, run the script using:
+After downloading your custom installation script, execute:
+
+bash
 
 ```bash
-chmod +x docker.sh   # Make it executable (Linux only)
+chmod +x docker.sh
 ./docker.sh
 ```
 
 Or alternatively:
 
+bash
+
 ```bash
 sh docker.sh
 ```
+
 ---
+
+## Verify Docker Installation
+
+Check Docker version:
+
+bash
+
+```bash
+docker --version
+```
+
+Check Docker service:
+
+bash
+
+```bash
+sudo systemctl status docker --no-pager
+```
+
+Test Docker:
+
+bash
+
+```bash
+sudo docker run hello-world
+```
+
+---
+
+> **Important Notes:**- The Docker convenience script installs the latest stable Docker Engine by default.
+> - Installation requires root or sudo privileges.
+> - Always review downloaded scripts before executing them.
+> - The convenience script is not recommended for production environments.
+> - For production, prefer the official Docker package repository installation method.
+
+Official documentation: https://docs.docker.com/engine/install/

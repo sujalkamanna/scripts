@@ -1,36 +1,63 @@
-```bash
+
 #!/bin/bash
 
+set -e
+
 #==========================================================
-# Step 1: Update and Install prerequisites
+# Step 1: Update packages and install prerequisites
 #==========================================================
 echo "🔧 Updating packages and installing prerequisites..."
+
 sudo apt update
-sudo apt install -y curl jq
+sudo apt install -y ca-certificates curl gnupg
 
 #==========================================================
-# Step 2: Install Docker Compose
+# Step 2: Configure Docker repository
 #==========================================================
-echo "📦 Installing Docker Compose..."
-DOCKER_COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r '.tag_name')
-sudo curl -L "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
+echo "🐳 Configuring Docker repository..."
+
+sudo install -m 0755 -d /etc/apt/keyrings
+
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+    -o /etc/apt/keyrings/docker.asc
+
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 #==========================================================
-# Step 3: Ensure Docker is running
+# Step 3: Install Docker Engine and Compose V2
 #==========================================================
-echo "🚀 Checking Docker service..."
+echo "📦 Installing Docker Engine and Docker Compose V2..."
+
+sudo apt update
+
+sudo apt install -y \
+    docker-ce \
+    docker-ce-cli \
+    containerd.io \
+    docker-buildx-plugin \
+    docker-compose-plugin
+
+#==========================================================
+# Step 4: Enable and start Docker service
+#==========================================================
+echo "🚀 Starting Docker service..."
+
 sudo systemctl enable docker
 sudo systemctl start docker
-sudo systemctl restart docker
 
 #==========================================================
-# Step 4: Verify Installation
+# Step 5: Verify installation
 #==========================================================
-echo "✅ Verifying Docker Compose installation..."
-docker-compose --version
+echo "✅ Verifying Docker installation..."
+
 docker --version
+docker compose version
+
 sudo systemctl status docker --no-pager
 
-echo "🎉 Docker Compose installation is complete and Docker is running!"
-```
+echo "🎉 Docker Engine and Docker Compose V2 installation completed!"

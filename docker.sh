@@ -2,33 +2,28 @@
 
 set -e
 
-echo "📥 Downloading Docker install script..."
+# Download Docker installation script
+echo "📥 Downloading Docker installation script..."
 curl -fsSL https://get.docker.com -o get-docker.sh
 
-echo "🔍 Previewing Docker installation (dry-run)..."
-sudo sh get-docker.sh --dry-run
+# Preview installation steps (Dry Run)
+echo "🔍 Previewing Docker installation..."
+sudo sh ./get-docker.sh --dry-run
 
-sleep 3
-
+# Install Docker
 echo "🐳 Installing Docker..."
-sudo sh get-docker.sh
+sudo sh ./get-docker.sh
 
-#==========================================================
-# Post-install steps
-#==========================================================
-
-echo "🚀 Starting Docker..."
+# Enable and start Docker
+echo "🚀 Starting Docker service..."
 sudo systemctl enable docker
 sudo systemctl start docker
 
-# Add current user to docker group
-echo "👤 Adding user to docker group..."
-sudo usermod -aG docker $USER
-
 # Verify installation
-echo "🔍 Docker version:"
+echo "🔍 Verifying Docker installation..."
 docker --version
+
+echo "✅ Docker installed successfully!"
 
 echo ""
 echo "✅ Docker installed successfully!"
-echo "⚠️ You may need to log out and log back in to use Docker without sudo."
